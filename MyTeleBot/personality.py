@@ -4,8 +4,10 @@ import wikipedia
 import logging
 
 class SiegePersonality:
-    def __init__(self, twitter_username: str = None):
-        self.twitter_username = twitter_username  # Add the Twitter username to emulate
+    def __init__(self, twitter_username=None):
+        # Optional Twitter account to emulate
+        self.twitter_username = twitter_username
+
         self.android_phrases = [
             "my combat systems are online",
             "techpriest programming activated",
@@ -83,6 +85,12 @@ class SiegePersonality:
         self.mood_indicators = [
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
+
+    # ... [all other methods stay the same, unchanged] ...
+
+# Create Siege personality instance with Twitter account
+siege = SiegePersonality(twitter_username="Aliathewhite")
+
 
     def get_periodic_element(self, atomic_number: int) -> str:
         """Get element info by atomic number"""
