@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Main entry point for the Harley Quinn Telegram Bot
+Main entry point for the Siege Telegram Bot (Cohere-powered)
 """
 import asyncio
 import logging
