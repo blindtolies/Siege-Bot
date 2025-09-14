@@ -32,7 +32,8 @@ class SiegeBot:
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_name = self._get_user_name(update)
-        await update.message.reply_text(self.personality.get_start_message(user_name))
+        is_private = (update.effective_chat.type == "private")
+        await update.message.reply_text(self.personality.get_start_message(user_name, is_private=is_private))
         self._remember_user(update, user_name, update.message.chat_id)
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -45,6 +46,7 @@ class SiegeBot:
         chat_id = update.effective_chat.id
         user_id = update.effective_user.id
         user_name = self._get_user_name(update)
+        is_private = (update.effective_chat.type == "private")
 
         if update.effective_chat.type in ("group", "supergroup"):
             await self.update_admins(chat_id, context)
@@ -53,13 +55,13 @@ class SiegeBot:
         self._remember_user(update, user_name, chat_id, is_admin)
         self._learn_from_conversation(user_id, update.message.text)
 
+        # FIRST: Check for element queries or company number queries
         direct_reply = self.personality.direct_reply(update.message.text, user_name)
         if direct_reply is not None:
             await update.message.reply_text(direct_reply)
             return
 
-        # For everything else, send the prompt to the LLM and reply with its output
-        prompt = self.personality.create_prompt(update.message.text, user_name)
+        prompt = self.personality.create_prompt(update.message.text, user_name, is_private=is_private)
         response = await asyncio.to_thread(
             self.cohere_client.generate,
             model='command',
@@ -69,7 +71,7 @@ class SiegeBot:
             stop_sequences=["\n\n", "Human:", "User:"]
         )
         generated_text = response.generations[0].text.strip()
-        final_response = self.personality.post_process_response(generated_text, user_name)
+        final_response = self.personality.post_process_response(generated_text, user_name, is_private=is_private)
         await update.message.reply_text(final_response)
 
     def _get_user_name(self, update: Update):
