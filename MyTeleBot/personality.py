@@ -84,6 +84,22 @@ class SiegePersonality:
         self.mood_indicators = [
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
+        
+        # --------- NEW: Hardcoded addresses/phones dictionary ---------
+        self.known_places = {
+            "starbucks": {"address": "123 Main St, New York, NY", "phone": "+1 212-555-0101"},
+            "mcdonald's": {"address": "456 Elm Ave, Chicago, IL", "phone": "+1 312-555-0199"},
+            # Add more as needed, use lowercase keys
+        }
+
+    # --------- NEW: Place lookup function ---------
+    def lookup_place(self, query: str):
+        """Look up address/phone for a known place in the query"""
+        q = query.lower()
+        for name, info in self.known_places.items():
+            if name in q:
+                return f"{name.title()} address: {info['address']}, phone: {info['phone']}"
+        return None
 
     def get_periodic_element(self, atomic_number: int) -> str:
         """Get element info by atomic number"""
@@ -147,6 +163,11 @@ class SiegePersonality:
             return "Wikipedia failed me, damn it"
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
+        # --------- NEW: Address/phone lookup shortcut ---------
+        lookup = self.lookup_place(user_message)
+        if lookup:
+            return f"@{user_name} {lookup}"
+
         """Create a personality-driven prompt for Cohere"""
         context = "private chat" if is_private else "group chat"
         interaction_type = ""
