@@ -15,10 +15,8 @@ class SiegeBot:
         self.cohere_client = cohere.Client(self.config.cohere_api_key)
         self.bot_username = "@Siege_Chat_Bot"
         self.application = None
-
-        # In-memory state
-        self.user_data = {}         # user_id: {"username": ..., "is_admin": bool, "history": [..]}
-        self.admins_per_chat = {}   # chat_id: set([admin_user_ids])
+        self.user_data = {}
+        self.admins_per_chat = {}
 
     async def start(self):
         token = self.config.telegram_token
@@ -48,27 +46,23 @@ class SiegeBot:
         user_id = update.effective_user.id
         user_name = self._get_user_name(update)
 
-        # Update admin list for this group if group chat
         if update.effective_chat.type in ("group", "supergroup"):
             await self.update_admins(chat_id, context)
 
-        # Remember and learn from this user
         is_admin = self.is_admin(chat_id, user_id)
         self._remember_user(update, user_name, chat_id, is_admin)
         self._learn_from_conversation(user_id, update.message.text)
 
-        # Personalized greeting on first message in this session
         if len(self.user_data[user_id]["history"]) == 1:
             greeting = self.personality.personalized_greeting(user_id, self.user_data[user_id])
             await update.message.reply_text(greeting)
 
-        # Address/phone lookup shortcut: reply instantly if found
-        lookup_reply = self.personality.lookup_place(update.message.text)
-        if lookup_reply:
-            await update.message.reply_text(f"@{user_name} {lookup_reply}")
+        # Directly handle address/phone or element lookup if create_prompt returns such
+        prompt = self.personality.create_prompt(update.message.text, user_name)
+        if prompt.startswith(f"@{user_name} address:") or prompt.startswith(f"@{user_name} Sorry") or prompt.startswith(f"@{user_name} Silver") or "atomic number" in prompt:
+            await update.message.reply_text(prompt)
             return
 
-        # Generate and send response via LLM
         response = await self.generate_response(update.message.text, user_name)
         await update.message.reply_text(response)
 
@@ -103,8 +97,7 @@ class SiegeBot:
 
     async def generate_response(self, user_message, user_name):
         prompt = self.personality.create_prompt(user_message, user_name)
-        # If this is a direct address/phone answer, just return it
-        if prompt.startswith(f"@{user_name} address:") or prompt.startswith(f"@{user_name} Sorry"):
+        if prompt.startswith(f"@{user_name} address:") or prompt.startswith(f"@{user_name} Sorry") or prompt.startswith(f"@{user_name} Silver") or "atomic number" in prompt:
             return prompt
         response = await asyncio.to_thread(
             self.cohere_client.generate,
