@@ -53,18 +53,9 @@ class SiegeBot:
         self._remember_user(update, user_name, chat_id, is_admin)
         self._learn_from_conversation(user_id, update.message.text)
 
-        if len(self.user_data[user_id]["history"]) == 1:
-            greeting = self.personality.personalized_greeting(user_id, self.user_data[user_id])
-            await update.message.reply_text(greeting)
-
-        # Directly handle address/phone or element lookup if create_prompt returns such
+        # Only send one reply per message:
         prompt = self.personality.create_prompt(update.message.text, user_name)
-        if prompt.startswith(f"@{user_name} address:") or prompt.startswith(f"@{user_name} Sorry") or prompt.startswith(f"@{user_name} Silver") or "atomic number" in prompt:
-            await update.message.reply_text(prompt)
-            return
-
-        response = await self.generate_response(update.message.text, user_name)
-        await update.message.reply_text(response)
+        await update.message.reply_text(prompt)
 
     def _get_user_name(self, update: Update):
         return update.effective_user.username or update.effective_user.first_name or "stranger"
@@ -94,19 +85,3 @@ class SiegeBot:
         history.append(message)
         if len(history) > 10:
             self.user_data[user_id]["history"] = history[-10:]
-
-    async def generate_response(self, user_message, user_name):
-        prompt = self.personality.create_prompt(user_message, user_name)
-        if prompt.startswith(f"@{user_name} address:") or prompt.startswith(f"@{user_name} Sorry") or prompt.startswith(f"@{user_name} Silver") or "atomic number" in prompt:
-            return prompt
-        response = await asyncio.to_thread(
-            self.cohere_client.generate,
-            model='command',
-            prompt=prompt,
-            max_tokens=100,
-            temperature=0.8,
-            stop_sequences=["\n\n", "Human:", "User:"]
-        )
-        generated_text = response.generations[0].text.strip()
-        final_response = self.personality.post_process_response(generated_text)
-        return final_response
