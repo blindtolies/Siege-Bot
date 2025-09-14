@@ -53,7 +53,6 @@ class SiegeBot:
         self._remember_user(update, user_name, chat_id, is_admin)
         self._learn_from_conversation(user_id, update.message.text)
 
-        # Handle direct lookup responses (address/phone/element): reply instantly
         direct_reply = self.personality.direct_reply(update.message.text, user_name)
         if direct_reply is not None:
             await update.message.reply_text(direct_reply)
