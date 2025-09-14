@@ -94,12 +94,13 @@ class SiegePersonality:
 
     # --------- Place lookup function ---------
     def lookup_place(self, query: str):
-        """Look up address/phone for a known place in the query"""
-        q = query.lower()
-        for name, info in self.known_places.items():
-            if name in q:
-                return f"{name.title()} address: {info['address']}, phone: {info['phone']}"
-        return None
+    """Look up address/phone for a known place in the query. Never invent or guess."""
+    q = query.lower()
+    for name, info in self.known_places.items():
+        if name in q:
+            return f"{name.title()} address: {info['address']}, phone: {info['phone']}"
+    # Not found
+    return "Sorry, I only know addresses for specific places. Ask for Starbucks or McDonald's, or have the admin update my list."
 
     def get_periodic_element(self, atomic_number: int) -> str:
         """Get element info by atomic number"""
