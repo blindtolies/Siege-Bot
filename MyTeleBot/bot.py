@@ -53,11 +53,28 @@ class SiegeBot:
         self._remember_user(update, user_name, chat_id, is_admin)
         self._learn_from_conversation(user_id, update.message.text)
 
-        # Only send one reply per message:
+        # Handle direct lookup responses (address/phone/element): reply instantly
+        direct_reply = self.personality.direct_reply(update.message.text, user_name)
+        if direct_reply is not None:
+            await update.message.reply_text(direct_reply)
+            return
+
+        # For everything else, send the prompt to the LLM and reply with its output
         prompt = self.personality.create_prompt(update.message.text, user_name)
-        await update.message.reply_text(prompt)
+        response = await asyncio.to_thread(
+            self.cohere_client.generate,
+            model='command',
+            prompt=prompt,
+            max_tokens=100,
+            temperature=0.8,
+            stop_sequences=["\n\n", "Human:", "User:"]
+        )
+        generated_text = response.generations[0].text.strip()
+        final_response = self.personality.post_process_response(generated_text)
+        await update.message.reply_text(final_response)
 
     def _get_user_name(self, update: Update):
+        # Always return a string
         return update.effective_user.username or update.effective_user.first_name or "stranger"
 
     async def update_admins(self, chat_id, context):
