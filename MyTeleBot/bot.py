@@ -64,10 +64,7 @@ class SiegeBot:
 
         # Address/phone lookup shortcut: reply instantly if found
         lookup_reply = self.personality.lookup_place(update.message.text)
-        if lookup_reply and not lookup_reply.startswith("Sorry"):
-            await update.message.reply_text(f"@{user_name} {lookup_reply}")
-            return
-        elif lookup_reply and lookup_reply.startswith("Sorry"):
+        if lookup_reply:
             await update.message.reply_text(f"@{user_name} {lookup_reply}")
             return
 
@@ -79,7 +76,6 @@ class SiegeBot:
         return update.effective_user.username or update.effective_user.first_name or "stranger"
 
     async def update_admins(self, chat_id, context):
-        # Only call this occasionally or on new members to avoid API spam
         try:
             admins = await context.bot.get_chat_administrators(chat_id)
             self.admins_per_chat[chat_id] = set(admin.user.id for admin in admins)
@@ -100,7 +96,6 @@ class SiegeBot:
         self.user_data[user_id]["is_admin"] = is_admin
 
     def _learn_from_conversation(self, user_id, message):
-        # Naive: store last 10 messages per user
         history = self.user_data[user_id]["history"]
         history.append(message)
         if len(history) > 10:
