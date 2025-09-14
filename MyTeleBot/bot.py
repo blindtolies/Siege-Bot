@@ -64,13 +64,10 @@ class SiegeBot:
 
         # Address/phone lookup shortcut: reply instantly if found
         lookup_reply = self.personality.lookup_place(update.message.text)
-        if (
-            lookup_reply and
-            not lookup_reply.startswith("Sorry, I only know addresses for specific places")
-        ):
+        if lookup_reply and not lookup_reply.startswith("Sorry"):
             await update.message.reply_text(f"@{user_name} {lookup_reply}")
             return
-        elif lookup_reply and lookup_reply.startswith("Sorry, I only know addresses for specific places"):
+        elif lookup_reply and lookup_reply.startswith("Sorry"):
             await update.message.reply_text(f"@{user_name} {lookup_reply}")
             return
 
@@ -110,8 +107,10 @@ class SiegeBot:
             self.user_data[user_id]["history"] = history[-10:]
 
     async def generate_response(self, user_message, user_name):
-        # Use Cohere API as normal
         prompt = self.personality.create_prompt(user_message, user_name)
+        # If this is a direct address/phone answer, just return it
+        if prompt.startswith(f"@{user_name} address:") or prompt.startswith(f"@{user_name} Sorry"):
+            return prompt
         response = await asyncio.to_thread(
             self.cohere_client.generate,
             model='command',
