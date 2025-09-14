@@ -86,30 +86,29 @@ class SiegePersonality:
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
 
-    # --------- Place lookup using DuckDuckGo web search ---------
+    def is_lookup_query(self, query):
+        keywords = [
+            "address", "phone", "contact", "location", "where is", "number", "call", "directions"
+        ]
+        query_lower = query.lower()
+        return any(kw in query_lower for kw in keywords)
+
     def lookup_place(self, query: str):
         """
-        Search DuckDuckGo for address and phone number of a place mentioned in the query.
-        Returns a string or None.
+        Search DuckDuckGo for address and phone number of a place mentioned in the query,
+        but ONLY if the query looks like a lookup request.
         """
-        search_terms = [
-            "address", "location", "phone", "contact", "number"
-        ]
-        # Try to extract the place name
-        q = query.strip()
-        # Build a search query
-        search_query = f"{q} address phone number"
+        if not self.is_lookup_query(query):
+            return None  # Do not trigger lookup for unrelated messages
+
+        search_query = f"{query.strip()} address phone number"
         try:
-            # Use DuckDuckGo Instant Answer API (or fallback to scraping with requests+regex)
             url = "https://duckduckgo.com/html/"
             params = {"q": search_query}
-            headers = {
-                "User-Agent": "Mozilla/5.0"
-            }
+            headers = {"User-Agent": "Mozilla/5.0"}
             resp = requests.get(url, params=params, headers=headers, timeout=8)
             if resp.status_code == 200:
                 text = resp.text
-                # Try to extract a plausible address or phone number from top results
                 address_match = re.search(r'((\d{1,5}[\w\s.,-]+),?\s*([A-Z][a-z]+),?\s*([A-Z]{2}),?\s*(\d{5}))', text)
                 phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', text)
                 address = address_match.group(1) if address_match else None
@@ -126,13 +125,12 @@ class SiegePersonality:
             logging.error(f"Error in lookup_place: {e}")
             return "Sorry, I couldn't fetch that info right now."
 
-    # --------- Wikipedia search for periodic table and other info ---------
+    # Wikipedia search for periodic table and other info
     def search_wikipedia(self, query: str) -> str:
         """Search Wikipedia for factual information, including periodic table data"""
         try:
             original_query = query
             query = re.sub(r'what is|tell me about|explain', '', query, flags=re.IGNORECASE).strip()
-            # Search Wikipedia for the topic (element, science, general)
             result = wikipedia.summary(query, sentences=2, auto_suggest=True, redirect=True)
             return result[:450] + "..." if len(result) > 450 else result
         except wikipedia.exceptions.DisambiguationError as e:
@@ -145,15 +143,12 @@ class SiegePersonality:
             return "Wikipedia failed me, damn it"
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
-        # --------- Address/phone lookup shortcut ---------
         lookup = self.lookup_place(user_message)
-        # If found, reply immediately with it
         if lookup and not lookup.startswith("Sorry"):
             return f"@{user_name} {lookup}"
         elif lookup and lookup.startswith("Sorry"):
             return f"@{user_name} {lookup}"
 
-        """Create a personality-driven prompt for Cohere"""
         context = "private chat" if is_private else "group chat"
         interaction_type = ""
 
@@ -207,7 +202,6 @@ Respond as Siege the highly intelligent military android who is scientifically a
         return prompt
 
     def post_process_response(self, generated_text: str) -> str:
-        """Post-process the AI response to ensure personality consistency"""
         generated_text = re.sub(r'(As an AI|I am an AI|I\'m an AI)', 'As an android', generated_text, flags=re.IGNORECASE)
         if random.random() < 0.2:
             android_phrase = random.choice(self.android_phrases)
@@ -290,7 +284,6 @@ Warning: Will roast you harder than Napoleon's retreat from Russia. May cause ex
         return f"{base}\n" + "\n".join(relations)
 
     def get_current_time(self):
-        """Get current time, date, and year information in Eastern Time"""
         try:
             eastern = pytz.timezone('US/Eastern')
             now = datetime.now(eastern)
@@ -304,7 +297,6 @@ Warning: Will roast you harder than Napoleon's retreat from Russia. May cause ex
             return "Time circuits are malfunctioning! 🕐"
 
     def calculate_math(self, text):
-        """Calculate math expressions from text"""
         try:
             text_clean = re.sub(r'\b(calculate|what\s+is|solve|equals?|=)\b', '', text, flags=re.IGNORECASE)
             math_pattern = r'[\d\.\+\-\*/\(\)\s]+'
