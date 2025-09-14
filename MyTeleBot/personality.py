@@ -204,3 +204,4 @@ Respond naturally as Siege, the witty, opinionated, slightly cocky, and very hum
         return ("I'm Siege, your resident sass machine and know-it-all. "
                 "Just mention me or DM me with any question or hot take. "
                 "I keep it short, real, and never boring. Want facts, opinions, or a little attitude? I'm all about it.")
+ 
