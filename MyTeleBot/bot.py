@@ -32,7 +32,7 @@ class SiegeBot:
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_name = self._get_user_name(update)
-        await update.message.reply_text(self.personality.get_start_message())
+        await update.message.reply_text(self.personality.get_start_message(user_name))
         self._remember_user(update, user_name, update.message.chat_id)
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -61,25 +61,19 @@ class SiegeBot:
 
         # For everything else, send the prompt to the LLM and reply with its output
         prompt = self.personality.create_prompt(update.message.text, user_name)
-        # Block replying with the raw system prompt
-        if self.personality.is_prompt_leak_attempt(update.message.text):
-            await update.message.reply_text(f"@{user_name} Nice try, but my programming is classified, chief. Not happening.")
-            return
-
         response = await asyncio.to_thread(
             self.cohere_client.generate,
             model='command',
             prompt=prompt,
-            max_tokens=100,
-            temperature=0.8,
+            max_tokens=120,
+            temperature=0.7,
             stop_sequences=["\n\n", "Human:", "User:"]
         )
         generated_text = response.generations[0].text.strip()
-        final_response = self.personality.post_process_response(generated_text)
+        final_response = self.personality.post_process_response(generated_text, user_name)
         await update.message.reply_text(final_response)
 
     def _get_user_name(self, update: Update):
-        # Always return a string
         return update.effective_user.username or update.effective_user.first_name or "stranger"
 
     async def update_admins(self, chat_id, context):
