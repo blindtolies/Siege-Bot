@@ -62,7 +62,19 @@ class SiegeBot:
             greeting = self.personality.personalized_greeting(user_id, self.user_data[user_id])
             await update.message.reply_text(greeting)
 
-        # Generate and send response (with address/phone lookup shortcut)
+        # Address/phone lookup shortcut: reply instantly if found
+        lookup_reply = self.personality.lookup_place(update.message.text)
+        if (
+            lookup_reply and
+            not lookup_reply.startswith("Sorry, I only know addresses for specific places")
+        ):
+            await update.message.reply_text(f"@{user_name} {lookup_reply}")
+            return
+        elif lookup_reply and lookup_reply.startswith("Sorry, I only know addresses for specific places"):
+            await update.message.reply_text(f"@{user_name} {lookup_reply}")
+            return
+
+        # Generate and send response via LLM
         response = await self.generate_response(update.message.text, user_name)
         await update.message.reply_text(response)
 
@@ -98,12 +110,7 @@ class SiegeBot:
             self.user_data[user_id]["history"] = history[-10:]
 
     async def generate_response(self, user_message, user_name):
-        # Address/phone lookup shortcut: only reply, don't send to Cohere
-        lookup = self.personality.lookup_place(user_message)
-        if lookup:
-            return f"@{user_name} {lookup}"
-
-        # Otherwise, use user's history to improve the prompt
+        # Use Cohere API as normal
         prompt = self.personality.create_prompt(user_message, user_name)
         response = await asyncio.to_thread(
             self.cohere_client.generate,
