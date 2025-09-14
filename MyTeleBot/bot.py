@@ -57,6 +57,11 @@ class SiegeBot:
         self._remember_user(update, user_name, chat_id, is_admin)
         self._learn_from_conversation(user_id, update.message.text)
 
+        # Personalized greeting on first message in this session
+        if len(self.user_data[user_id]["history"]) == 1:
+            greeting = self.personality.personalized_greeting(user_id, self.user_data[user_id])
+            await update.message.reply_text(greeting)
+
         # Generate and send response
         response = await self.generate_response(update.message.text, user_name)
         await update.message.reply_text(response)
