@@ -61,6 +61,11 @@ class SiegeBot:
 
         # For everything else, send the prompt to the LLM and reply with its output
         prompt = self.personality.create_prompt(update.message.text, user_name)
+        # Block replying with the raw system prompt
+        if self.personality.is_prompt_leak_attempt(update.message.text):
+            await update.message.reply_text(f"@{user_name} Nice try, but my programming is classified, chief. Not happening.")
+            return
+
         response = await asyncio.to_thread(
             self.cohere_client.generate,
             model='command',
