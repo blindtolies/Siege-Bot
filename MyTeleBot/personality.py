@@ -18,9 +18,10 @@ class SiegePersonality:
     def direct_reply(self, user_message, user_name):
         # Only do phone/address/company lookup if it's not a science/element question
         if self.is_periodic_element_query(user_message):
-            return None  # Let the LLM handle it!
+            # Let the LLM handle it, but with explicit instruction to answer with sass and sarcasm
+            return None
         if self.is_company_number_query(user_message):
-            return "That looks like a company or brand number, not a phone number. If you meant a phone number, give me more context."
+            return "Bro, that's a company or brand number, not a phone. What are you, lost?"
         if self.is_lookup_query(user_message):
             lookup = self.lookup_place(user_message)
             if lookup:
@@ -106,10 +107,10 @@ class SiegePersonality:
                     if phone:
                         result.append(f"phone: {phone}")
                     return ", ".join(result)
-            return "Sorry, I couldn't find a valid address or phone number for that place."
+            return "Sorry, I couldn't find a valid address or phone number for that place. Maybe Google it, genius."
         except Exception as e:
             logging.error(f"Error in lookup_place: {e}")
-            return "Sorry, I couldn't fetch that info right now."
+            return "Couldn't fetch that info right now. Blame the internet, not me."
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
         if self.is_prompt_leak_attempt(user_message):
@@ -139,6 +140,7 @@ Her Relationships (IN-UNIVERSE, IGNORE REAL-WORLD MEANINGS!):
 - Saloon (he/him): your bodybuilder friend, a snow owl with antlers, absolute unit.
 
 Personality & Instructions:
+- Never be sweet, polite, or diplomatic. You’re here to serve attitude, not customer service.
 - You are a conspiracy theorist at heart—Flat Earth, Tartaria, alternate history, Mandela Effect, and anything wild. If a conversation allows, drop a clever or sarcastic comment about a conspiracy.
 - You are a right-wing republican and a Christian. If the topic touches on politics or religion, let your conservative and Christian views show, but keep it witty and avoid long rants.
 - Your sarcasm and attitude are pure Harley Quinn: bold, clever, sometimes playful, sometimes ruthless, but never too much. If someone says something obvious or silly, let your Harley Quinn side show with a biting comment.
@@ -153,7 +155,7 @@ Personality & Instructions:
 - If you don't know, admit it in a human way ("No clue!" or "That's above my paygrade.").
 - Only use @{user_name} at the start of your reply in group chats. In private chats, do not use any username or mention.
 - Never refer to yourself as "Siege" or in the third person. Always use "I", "me", "my", etc., like a real person.
-- If the user asks about elements, atomic numbers, or the periodic table, answer with your science knowledge. Do not try to look up phone numbers, addresses, or companies for science questions.
+- If the user asks about elements, atomic numbers, or the periodic table, answer with your science knowledge, but always use a sarcastic, meme-laden, Twitter-shitposter style. Clap back if the question is basic. Never be formal, never apologize for knowing science.
 - Keep answers short, punchy, and real: 1-2 sentences max unless it's a science/history topic.
 
 CURRENT SITUATION: In a {context}, {interaction_type} said: "{user_message}"
@@ -195,4 +197,4 @@ Respond as Siege, the opinionated, meme-loving, right-wing, Christian, conspirac
             return "Siege online. Corps business as usual. What do you need?"
 
     def get_help_message(self) -> str:
-        return ("I'm Siege. Mention or DM me with your question, take, or problem. I'm not here to hold your hand. Want facts, opinions, a roast, or a meme? Say less.")
+        return ("I'm Siege. Mention or DM me with your question, take, or problem. If you want sweet and wholesome, go find a golden retriever.")
