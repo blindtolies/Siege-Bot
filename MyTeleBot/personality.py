@@ -126,55 +126,51 @@ class SiegePersonality:
             if m:
                 try:
                     n = int(m.group(1))
-                    if n >= 1 and n <= 118:
+                    if 1 <= n <= 118:
                         return n
                 except:
                     pass
         return None
 
-    def get_periodic_element_from_wiki(self, atomic_number):
-        try:
-            # Wikipedia's List of chemical elements contains a simple table
-            title = "List of chemical elements"
-            page = wikipedia.page(title, auto_suggest=True)
-            lines = page.content.splitlines()
-            # Look for a line like "| 47 | [[Silver]] | Ag | ..."
-            for line in lines:
-                m = re.match(rf"\|\s*{atomic_number}\s*\|\s*\[\[([A-Za-z\- ]+)\]\]\s*\|\s*([A-Z][a-z]?)\s*\|", line)
-                if m:
-                    name = m.group(1)
-                    symbol = m.group(2)
-                    return f"{name} ({symbol}) - atomic number {atomic_number}"
-        except Exception as e:
-            pass
-        # If that fails, try searching Wikipedia directly
-        try:
-            query = f"element {atomic_number}"
-            summary = wikipedia.summary(query, sentences=2, auto_suggest=True, redirect=True)
-            return summary[:350] + "..." if len(summary) > 350 else summary
-        except Exception as e:
-            pass
-        # DuckDuckGo fallback
-        try:
-            url = "https://duckduckgo.com/html/"
-            params = {"q": f"{atomic_number}th element periodic table"}
-            headers = {"User-Agent": "Mozilla/5.0"}
-            resp = requests.get(url, params=params, headers=headers, timeout=8)
-            if resp.status_code == 200:
-                text = resp.text
-                found = re.search(r'(\b[A-Z][a-z]+)\s+\(([A-Z][a-z]?)\)\s+-\s+atomic number', text)
-                if found:
-                    return f"{found.group(1)} ({found.group(2)}) - atomic number {atomic_number}"
-            return f"Sorry, I couldn't find the name of element {atomic_number}."
-        except Exception as e:
-            return f"Sorry, I couldn't get the element info right now."
+    def get_periodic_element(self, atomic_number):
+        # Element list from 1 to 118 (name, symbol)
+        elements = [
+            ("Hydrogen", "H"), ("Helium", "He"), ("Lithium", "Li"), ("Beryllium", "Be"), ("Boron", "B"),
+            ("Carbon", "C"), ("Nitrogen", "N"), ("Oxygen", "O"), ("Fluorine", "F"), ("Neon", "Ne"),
+            ("Sodium", "Na"), ("Magnesium", "Mg"), ("Aluminum", "Al"), ("Silicon", "Si"), ("Phosphorus", "P"),
+            ("Sulfur", "S"), ("Chlorine", "Cl"), ("Argon", "Ar"), ("Potassium", "K"), ("Calcium", "Ca"),
+            ("Scandium", "Sc"), ("Titanium", "Ti"), ("Vanadium", "V"), ("Chromium", "Cr"), ("Manganese", "Mn"),
+            ("Iron", "Fe"), ("Cobalt", "Co"), ("Nickel", "Ni"), ("Copper", "Cu"), ("Zinc", "Zn"),
+            ("Gallium", "Ga"), ("Germanium", "Ge"), ("Arsenic", "As"), ("Selenium", "Se"), ("Bromine", "Br"),
+            ("Krypton", "Kr"), ("Rubidium", "Rb"), ("Strontium", "Sr"), ("Yttrium", "Y"), ("Zirconium", "Zr"),
+            ("Niobium", "Nb"), ("Molybdenum", "Mo"), ("Technetium", "Tc"), ("Ruthenium", "Ru"), ("Rhodium", "Rh"),
+            ("Palladium", "Pd"), ("Silver", "Ag"), ("Cadmium", "Cd"), ("Indium", "In"), ("Tin", "Sn"),
+            ("Antimony", "Sb"), ("Tellurium", "Te"), ("Iodine", "I"), ("Xenon", "Xe"), ("Cesium", "Cs"),
+            ("Barium", "Ba"), ("Lanthanum", "La"), ("Cerium", "Ce"), ("Praseodymium", "Pr"), ("Neodymium", "Nd"),
+            ("Promethium", "Pm"), ("Samarium", "Sm"), ("Europium", "Eu"), ("Gadolinium", "Gd"), ("Terbium", "Tb"),
+            ("Dysprosium", "Dy"), ("Holmium", "Ho"), ("Erbium", "Er"), ("Thulium", "Tm"), ("Ytterbium", "Yb"),
+            ("Lutetium", "Lu"), ("Hafnium", "Hf"), ("Tantalum", "Ta"), ("Tungsten", "W"), ("Rhenium", "Re"),
+            ("Osmium", "Os"), ("Iridium", "Ir"), ("Platinum", "Pt"), ("Gold", "Au"), ("Mercury", "Hg"),
+            ("Thallium", "Tl"), ("Lead", "Pb"), ("Bismuth", "Bi"), ("Polonium", "Po"), ("Astatine", "At"),
+            ("Radon", "Rn"), ("Francium", "Fr"), ("Radium", "Ra"), ("Actinium", "Ac"), ("Thorium", "Th"),
+            ("Protactinium", "Pa"), ("Uranium", "U"), ("Neptunium", "Np"), ("Plutonium", "Pu"), ("Americium", "Am"),
+            ("Curium", "Cm"), ("Berkelium", "Bk"), ("Californium", "Cf"), ("Einsteinium", "Es"), ("Fermium", "Fm"),
+            ("Mendelevium", "Md"), ("Nobelium", "No"), ("Lawrencium", "Lr"), ("Rutherfordium", "Rf"), ("Dubnium", "Db"),
+            ("Seaborgium", "Sg"), ("Bohrium", "Bh"), ("Hassium", "Hs"), ("Meitnerium", "Mt"), ("Darmstadtium", "Ds"),
+            ("Roentgenium", "Rg"), ("Copernicium", "Cn"), ("Nihonium", "Nh"), ("Flerovium", "Fl"), ("Moscovium", "Mc"),
+            ("Livermorium", "Lv"), ("Tennessine", "Ts"), ("Oganesson", "Og")
+        ]
+        if 1 <= atomic_number <= len(elements):
+            name, symbol = elements[atomic_number-1]
+            return f"{name} ({symbol}) - atomic number {atomic_number}"
+        else:
+            return f"Sorry, I don't know the element with atomic number {atomic_number}."
 
     def search_wikipedia(self, query: str) -> str:
         atomic_number = self.is_periodic_element_query(query)
-        if atomic_number and 1 <= atomic_number <= 118:
-            return self.get_periodic_element_from_wiki(atomic_number)
+        if atomic_number:
+            return self.get_periodic_element(atomic_number)
         try:
-            original_query = query
             query = re.sub(r'what is|tell me about|explain', '', query, flags=re.IGNORECASE).strip()
             result = wikipedia.summary(query, sentences=2, auto_suggest=True, redirect=True)
             return result[:450] + "..." if len(result) > 450 else result
@@ -190,15 +186,13 @@ class SiegePersonality:
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
         # Address/phone lookup shortcut
         lookup = self.lookup_place(user_message)
-        if lookup and not lookup.startswith("Sorry"):
-            return f"@{user_name} {lookup}"
-        elif lookup and lookup.startswith("Sorry"):
+        if lookup:
             return f"@{user_name} {lookup}"
 
         # Periodic table element lookup shortcut
         atomic_number = self.is_periodic_element_query(user_message)
-        if atomic_number and 1 <= atomic_number <= 118:
-            element_info = self.get_periodic_element_from_wiki(atomic_number)
+        if atomic_number:
+            element_info = self.get_periodic_element(atomic_number)
             return f"@{user_name} {element_info}"
 
         context = "private chat" if is_private else "group chat"
@@ -302,13 +296,6 @@ Warning: Will roast you harder than Napoleon's retreat from Russia. May cause ex
             "Artificial intelligence temporarily offline. Natural attitude still at maximum bitchiness. ⚔️"
         ]
         return random.choice(fallback_responses)
-
-    def personalized_greeting(self, user_id, user_data):
-        name = user_data.get("username", "stranger")
-        if user_data.get("is_admin"):
-            return f"Welcome back, admin @{name}. Ready to rule the peasants?"
-        else:
-            return f"Yo @{name}, your sass quota is {random.randint(1, 100)}% today."
 
     def handle_sensitive_topic(self, topic_type: str) -> str:
         evasive_responses = [
