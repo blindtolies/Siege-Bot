@@ -100,32 +100,28 @@ class SiegePersonality:
 
     def get_periodic_element(self, atomic_number):
         try:
-            search_query = f"element with atomic number {atomic_number} wikipedia"
+            # Step 1: Search DuckDuckGo for the element
+            search_query = f"element with atomic number {atomic_number}"
             headers = {'User-Agent': 'Mozilla/5.0'}
             response = requests.get(f"https://duckduckgo.com/html/?q={search_query}", headers=headers, timeout=8)
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            wikipedia_url = None
-            for a_tag in soup.find_all('a', href=True):
-                if 'en.wikipedia.org/wiki/' in a_tag['href']:
-                    wikipedia_url = a_tag['href']
-                    break
+            # Step 2: Target the DuckDuckGo "instant answer" box, which is more reliable
+            instant_answer_div = soup.find('div', class_=re.compile(r'zci__body'))
             
-            if not wikipedia_url:
-                return f"I couldn't find a Wikipedia page for element {atomic_number}."
+            if not instant_answer_div:
+                return f"I couldn't find an instant answer for element {atomic_number}."
 
-            response = requests.get(wikipedia_url, headers=headers, timeout=8)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # Step 3: Extract the title and symbol from the instant answer
+            title_tag = instant_answer_div.find('h2', class_=re.compile(r'zci__heading'))
+            symbol_tag = instant_answer_div.find('span', class_=re.compile(r'zci__subheading'))
 
-            first_paragraph = soup.find('p').get_text()
-
-            match = re.search(r"(\w+)\s+\((\w+)\)\s+is", first_paragraph, re.IGNORECASE)
-            if match:
-                name = match.group(1)
-                symbol = match.group(2)
+            if title_tag and symbol_tag:
+                name = title_tag.get_text().strip()
+                symbol = symbol_tag.get_text().strip()
                 return f"{name} ({symbol}) - atomic number {atomic_number}"
             else:
-                return f"Found a Wikipedia page for element {atomic_number}, but couldn't parse the details."
+                return f"Found a DuckDuckGo instant answer, but couldn't parse the details for element {atomic_number}."
 
         except Exception as e:
             logging.error(f"Error scraping periodic element info: {e}")
