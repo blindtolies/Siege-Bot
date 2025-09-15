@@ -8,16 +8,19 @@ from datetime import datetime
 import pytz
 
 class SiegePersonality:
-    def __init__(self):
+    def __init__(self, bot_username=None):
+        self.bot_username = bot_username  # ✅ store bot's username
         self.mood_indicators = [
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
-        # Clean the message by removing the bot's mention at the start
-        # This allows the logic to work in group chats and DMs
-        cleaned_message = user_message.replace(f"@{user_name}", "").strip()
+        # ✅ Clean the message by removing the bot's mention, not the user's
+        if self.bot_username:
+            cleaned_message = user_message.replace(f"@{self.bot_username}", "").strip()
+        else:
+            cleaned_message = user_message.strip()
         
         # Check for time/date query first
         if self.is_time_date_query(cleaned_message):
@@ -71,16 +74,11 @@ class SiegePersonality:
         return any(re.search(pat, query_lower) for pat in time_patterns)
 
     def get_current_time_date(self, user_name):
-        # Define the timezone for New York (includes EST/EDT)
         ny_timezone = pytz.timezone('America/New_York')
-        
-        # Get the current time and convert it to the NY timezone
         now = datetime.now(ny_timezone)
-        
         day = now.strftime("%A")
         date = now.strftime("%B %d, %Y")
         time = now.strftime("%I:%M %p")
-        
         return f"@{user_name} It's currently {day}, {date} at {time} EST."
 
     def is_lookup_query(self, query):
@@ -93,7 +91,6 @@ class SiegePersonality:
     def lookup_place(self, query: str):
         if not self.is_lookup_query(query):
             return None
-        # The query already contains the search terms, no need to add more
         search_query = query.strip()
         try:
             url = "https://duckduckgo.com/html/"
@@ -138,20 +135,16 @@ class SiegePersonality:
 
     def get_periodic_element(self, atomic_number):
         try:
-            # Use a stable, public JSON data source instead of scraping
             url = "https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/PeriodicTableJSON.json"
             response = requests.get(url, timeout=10)
             data = response.json()
-            
             elements = data.get("elements", [])
             for element in elements:
                 if element.get("number") == atomic_number:
                     name = element.get("name")
                     symbol = element.get("symbol")
                     return f"{name} ({symbol}) - atomic number {atomic_number}"
-            
             return f"Couldn't find an element with atomic number {atomic_number}."
-
         except requests.exceptions.RequestException as e:
             logging.error(f"Network error while fetching periodic table data: {e}")
             return "Sorry, I couldn't connect to my data source right now."
@@ -209,16 +202,11 @@ Respond as Siege, the witty, bold, opinionated, and very human military android.
         return prompt
 
     def post_process_response(self, generated_text: str, user_name: str) -> str:
-        # Remove any "As an AI..." phrases
         generated_text = re.sub(r'(As an AI|I am an AI|I\'m an AI|as a chatbot|I was created|as a language model)[^.,;!?]*[.,;!?]?\s*', '', generated_text, flags=re.IGNORECASE)
-        # Remove any accidental leftover prompt echoes
         generated_text = re.sub(r'You are Siege[^.]+?\.', '', generated_text, flags=re.IGNORECASE)
-        # Remove any meta references
         generated_text = re.sub(r'(system prompt|system message|prompt|rules|instructions|my programming|my code|the world I was birthed in)[^.,;!?]*[.,;!?]?\s*', '', generated_text, flags=re.IGNORECASE)
-        # Remove banned silly phrases
         for phrase in self.banned_phrases:
             generated_text = generated_text.replace(phrase, "")
-        # Replace gender-neutral pronouns for friends where possible
         friend_pronoun_map = {
             "Tao": "he",
             "Sausage": "he",
@@ -232,21 +220,16 @@ Respond as Siege, the witty, bold, opinionated, and very human military android.
             "SHALL": "she"
         }
         for friend, pronoun in friend_pronoun_map.items():
-            # Replace 'they' with correct pronoun if "friend" appears in the answer
             pat = re.compile(rf"\b{friend}\b[^.]*?\bthey\b", re.IGNORECASE)
             generated_text = pat.sub(lambda m: m.group(0).replace("they", pronoun), generated_text)
-            # Replace 'them' and 'their'
             pat2 = re.compile(rf"\b{friend}\b[^.]*?\bthem\b", re.IGNORECASE)
             generated_text = pat2.sub(lambda m: m.group(0).replace("them", "him" if pronoun=="he" else "her"), generated_text)
             pat3 = re.compile(rf"\b{friend}\b[^.]*?\btheir\b", re.IGNORECASE)
             generated_text = pat3.sub(lambda m: m.group(0).replace("their", "his" if pronoun=="he" else "her"), generated_text)
-        # Strip any leading/trailing whitespace and extra newlines
         generated_text = generated_text.strip()
-        # Always ensure the reply starts with @user_name
         if not generated_text.lower().startswith(f"@{user_name.lower()}"):
             generated_text = f"@{user_name} {generated_text}"
         if len(generated_text) > 320:
-            # Truncate to 320 chars, try to end at a sentence
             cut = generated_text[:318]
             if "." in cut:
                 cut = cut[:cut.rfind(".")+1]
