@@ -80,10 +80,14 @@ class SiegePersonality:
 
     def is_periodic_element_query(self, query):
         element_patterns = [
+            # Matches "46th element" or "46 element"
             r"\b(\d{1,3})(?:st|nd|rd|th)?\s+element\b",
-            r"\belement\s+#?(\d{1,3})\b",
-            r"\batomic\s+number\s+(\d{1,3})\b",
-            r"\belement\s+number\s+(\d{1,3})\b"
+            # Matches "atomic number 46" or "atomic number of 46"
+            r"\batomic\s+number(?:\s+of)?\s+(\d{1,3})\b",
+            # Matches "element #46" or "element number 46"
+            r"\belement\s+#?number?\s*(\d{1,3})\b",
+            # Matches simple queries like "element 46" or "what is element 46"
+            r"\belement\s+(\d{1,3})\b"
         ]
         for pat in element_patterns:
             m = re.search(pat, query, re.IGNORECASE)
