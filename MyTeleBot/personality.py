@@ -9,19 +9,13 @@ class SiegePersonality:
         self.mood_indicators = [
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
-        self.banned_phrases = [
-            "gobble gobble", "gobble-gooble", "gobblegooble", "gobble", "gooble", "gooble gooble"
-        ]
+        # The 'gobble gobble' code has been removed
+        self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
         lookup = self.lookup_place(user_message)
         if lookup:
             return f"@{user_name} {lookup}"
-            
-        atomic_number = self.is_periodic_element_query(user_message)
-        if atomic_number:
-            element_info = self.get_periodic_element(atomic_number)
-            return f"@{user_name} {element_info}"
             
         if self.is_prompt_leak_attempt(user_message):
             return f"@{user_name} Nice try, but my programming is classified. Not happening."
@@ -75,62 +69,6 @@ class SiegePersonality:
             return "Sorry, I couldn't find a valid address or phone number for that place."
         except Exception as e:
             logging.error(f"Error in lookup_place: {e}")
-            return "Sorry, I couldn't fetch that info right now."
-
-    def is_periodic_element_query(self, query):
-        element_patterns = [
-            r"\b(\d{1,3})(?:st|nd|rd|th)?\s+element\b",
-            r"\batomic\s+number(?:\s+of)?\s+(\d{1,3})\b",
-            r"\belement\s+#?number?\s*(\d{1,3})\b",
-            r"\belement\s+(\d{1,3})\b"
-        ]
-        for pat in element_patterns:
-            m = re.search(pat, query, re.IGNORECASE)
-            if m:
-                try:
-                    n = int(m.group(1))
-                    if 1 <= n <= 118:
-                        return n
-                except:
-                    pass
-        return None
-
-    def get_periodic_element(self, atomic_number):
-        try:
-            # Step 1: Search DuckDuckGo for the element and find the Wikipedia link
-            search_query = f"element with atomic number {atomic_number} wikipedia"
-            headers = {'User-Agent': 'Mozilla/5.0'}
-            response = requests.get(f"https://duckduckgo.com/html/?q={search_query}", headers=headers, timeout=8)
-            soup = BeautifulSoup(response.text, 'html.parser')
-
-            # Find the Wikipedia link in the search results
-            wikipedia_url = None
-            for a_tag in soup.find_all('a', href=True):
-                if 'en.wikipedia.org/wiki/' in a_tag['href']:
-                    wikipedia_url = a_tag['href']
-                    break
-            
-            if not wikipedia_url:
-                return f"I couldn't find a Wikipedia page for element {atomic_number}."
-
-            # Step 2: Scrape the specific Wikipedia page for the element info
-            response = requests.get(wikipedia_url, headers=headers, timeout=8)
-            soup = BeautifulSoup(response.text, 'html.parser')
-
-            # Find the first paragraph, which usually contains the info we need
-            first_paragraph = soup.find('p').get_text()
-
-            # Step 3: Parse the info using a simple regex on the paragraph text
-            match = re.search(r"(\w+)\s+\((\w+)\)\s+is", first_paragraph, re.IGNORECASE)
-            if match:
-                name = match.group(1)
-                symbol = match.group(2)
-                return f"{name} ({symbol}) - atomic number {atomic_number}"
-            else:
-                return f"Found a Wikipedia page for element {atomic_number}, but couldn't parse the details."
-
-        except Exception as e:
-            logging.error(f"Error scraping periodic element info: {e}")
             return "Sorry, I couldn't fetch that info right now."
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
