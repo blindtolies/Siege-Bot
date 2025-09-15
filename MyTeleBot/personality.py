@@ -1,15 +1,3 @@
-Yes, she won't know the date because the current `get_current_time_date` function has a bug. It is supposed to use your system's real-time clock to get the current date and time, but it's not implemented correctly. I will fix this for you.
-
-To fix this, I have:
-
-  * Replaced the placeholder in `get_current_time_date` with the correct code to get the live date and time.
-  * Updated the `is_time_date_query` function with more comprehensive keywords to ensure she always recognizes the question.
-
-### Updated personality.py
-
-Please replace your `personality.py` file with this new version. She will now be able to answer any questions about the current date and time.
-
-```python
 import random
 import re
 import logging
@@ -66,9 +54,13 @@ class SiegePersonality:
 
     def is_time_date_query(self, query):
         time_patterns = [
-            r"what(?:\'s| is)?\s+(?:the)?\s+(?:time|date)\b",
-            r"\b(?:current|todays?|what)\s+(?:time|date)\b",
-            r"\bwhat\s+day\s+is\s+it\b",
+            r"(what|what's|do you have) the time",
+            r"what time is it",
+            r"what's the date",
+            r"what's today's date",
+            r"what day is it",
+            r"current time",
+            r"current date",
         ]
         query_lower = query.lower()
         return any(re.search(pat, query_lower) for pat in time_patterns)
@@ -257,4 +249,3 @@ Respond as Siege, the witty, bold, opinionated, and very human military android.
 
     def get_help_message(self) -> str:
         return ("I'm Siege. Mention or DM me with your question, take, or problem. I keep it real: short, smart, bold, and always human. Ask about Napoleon, Tao, the Corps, or any of my friends—just don't expect a robot answer.")
-```
