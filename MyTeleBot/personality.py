@@ -55,12 +55,12 @@ class SiegePersonality:
     def is_time_date_query(self, query):
         time_patterns = [
             r"what(?:\'s| is)?\s+(?:the)?\s+time",
-            r"what time is it",
-            r"what(?:\'s| is)?\s+the\s+date",
+            r"what\s+time\s+is\s+it",
+            r"what(?:\'s| is)?\s+(?:the)?\s+date",
             r"what(?:\'s| is)?\s+today(?:\'s)?\s+date",
-            r"what day is it",
-            r"current time",
-            r"current date",
+            r"what\s+day\s+is\s+it",
+            r"current\s+time",
+            r"current\s+date",
         ]
         query_lower = query.lower()
         return any(re.search(pat, query_lower) for pat in time_patterns)
