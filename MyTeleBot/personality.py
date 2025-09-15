@@ -54,10 +54,10 @@ class SiegePersonality:
 
     def is_time_date_query(self, query):
         time_patterns = [
-            r"(what|what's|do you have) the time",
+            r"what(?:\'s| is)?\s+(?:the)?\s+time",
             r"what time is it",
-            r"what's the date",
-            r"what's today's date",
+            r"what(?:\'s| is)?\s+the\s+date",
+            r"what(?:\'s| is)?\s+today(?:\'s)?\s+date",
             r"what day is it",
             r"current time",
             r"current date",
