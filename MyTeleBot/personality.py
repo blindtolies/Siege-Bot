@@ -98,17 +98,29 @@ class SiegePersonality:
 
     def get_periodic_element(self, atomic_number):
         try:
-            query = f"Element atomic number {atomic_number}"
-            # Gets the first sentence of the summary
-            summary = wikipedia.summary(query, sentences=1)
-            # Find the element name and symbol using regex from the summary
-            match = re.search(r"(\w+)\s+\((\w+)\)\s+is an element with symbol", summary, re.IGNORECASE)
+            # Step 1: Search Wikipedia for the best matching page title
+            search_query = f"atomic number {atomic_number} element"
+            page_titles = wikipedia.search(search_query, results=1)
+            
+            if not page_titles:
+                return f"I couldn't find a periodic element with atomic number {atomic_number}."
+
+            page_title = page_titles[0]
+            
+            # Step 2: Get the summary from the specific page
+            summary = wikipedia.summary(page_title, sentences=1)
+            
+            # Step 3: Parse the summary for the element name and symbol
+            # The summary from a specific page title is much more predictable
+            match = re.search(r"(\w+)\s+\((\w+)\)", summary, re.IGNORECASE)
             if match:
                 name = match.group(1)
                 symbol = match.group(2)
                 return f"{name} ({symbol}) - atomic number {atomic_number}"
             else:
-                return f"I found information about element {atomic_number}, but couldn't parse the name/symbol."
+                # Fallback if the regex fails, just return the page title
+                return f"The element is {page_title} - atomic number {atomic_number}."
+
         except wikipedia.exceptions.PageError:
             return f"I couldn't find a periodic element with atomic number {atomic_number}."
         except Exception as e:
