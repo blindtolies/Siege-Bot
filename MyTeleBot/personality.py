@@ -99,10 +99,23 @@ class SiegePersonality:
             resp = requests.get(url, params=params, headers=headers, timeout=8)
             if resp.status_code == 200:
                 text = resp.text
-                address_match = re.search(r'((\d{1,5}[\w\s.,-]+),?\s*([A-Z][a-z]+),?\s*([A-Z]{2}),?\s*(\d{5}))', text)
+
+                # ✅ broader regex for addresses (catches more formats)
+                address_match = re.search(r'\d{1,5}\s+[\w\s.,-]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Highway|Hwy)[\w\s.,-]*', text, re.IGNORECASE)
                 phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', text)
-                address = address_match.group(1) if address_match else None
+
+                address = address_match.group(0) if address_match else None
                 phone = phone_match.group(1) if phone_match else None
+
+                # ✅ fallback: try to scrape snippets if regex failed
+                if not address:
+                    soup = BeautifulSoup(text, "html.parser")
+                    snippets = soup.find_all("a", href=True)
+                    for s in snippets:
+                        if re.search(r'\d{1,5}\s+[\w\s.,-]+', s.get_text()):
+                            address = s.get_text(strip=True)
+                            break
+
                 if address or phone:
                     result = []
                     if address:
