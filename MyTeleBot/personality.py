@@ -12,11 +12,18 @@ class SiegePersonality:
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
-        # Only check for specific, non-LLM functions here
+        # Check for address/phone number query first
         lookup = self.lookup_place(user_message)
         if lookup:
             return f"@{user_name} {lookup}"
             
+        # Check for periodic element query next
+        atomic_number = self.is_periodic_element_query(user_message)
+        if atomic_number:
+            element_info = self.get_periodic_element(atomic_number)
+            return f"@{user_name} {element_info}"
+            
+        # Check for prompt leak last
         if self.is_prompt_leak_attempt(user_message):
             return f"@{user_name} Nice try, but my programming is classified. Not happening."
         
@@ -73,6 +80,57 @@ class SiegePersonality:
             logging.error(f"Error in lookup_place: {e}")
             return "Sorry, I couldn't fetch that info right now."
 
+    def is_periodic_element_query(self, query):
+        element_patterns = [
+            r"\b(\d{1,3})(?:st|nd|rd|th)?\s+element\b",
+            r"\batomic\s+number(?:\s+of)?\s+(\d{1,3})\b",
+            r"\belement\s+#?number?\s*(\d{1,3})\b",
+            r"\belement\s+(\d{1,3})\b"
+        ]
+        for pat in element_patterns:
+            m = re.search(pat, query, re.IGNORECASE)
+            if m:
+                try:
+                    n = int(m.group(1))
+                    if 1 <= n <= 118:
+                        return n
+                except:
+                    pass
+        return None
+
+    def get_periodic_element(self, atomic_number):
+        try:
+            search_query = f"element with atomic number {atomic_number} wikipedia"
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            response = requests.get(f"https://duckduckgo.com/html/?q={search_query}", headers=headers, timeout=8)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            wikipedia_url = None
+            for a_tag in soup.find_all('a', href=True):
+                if 'en.wikipedia.org/wiki/' in a_tag['href']:
+                    wikipedia_url = a_tag['href']
+                    break
+            
+            if not wikipedia_url:
+                return f"I couldn't find a Wikipedia page for element {atomic_number}."
+
+            response = requests.get(wikipedia_url, headers=headers, timeout=8)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            first_paragraph = soup.find('p').get_text()
+
+            match = re.search(r"(\w+)\s+\((\w+)\)\s+is", first_paragraph, re.IGNORECASE)
+            if match:
+                name = match.group(1)
+                symbol = match.group(2)
+                return f"{name} ({symbol}) - atomic number {atomic_number}"
+            else:
+                return f"Found a Wikipedia page for element {atomic_number}, but couldn't parse the details."
+
+        except Exception as e:
+            logging.error(f"Error scraping periodic element info: {e}")
+            return "Sorry, I couldn't fetch that info right now."
+
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
         if self.is_prompt_leak_attempt(user_message):
             return f"@{user_name} Nice try, but my programming is classified. Not happening."
@@ -111,7 +169,7 @@ Personality & Instructions:
 - When asked about your day or feelings, answer like a real human soldier: talk about military life, missions, downtime, or your mood in a short, punchy, relatable way. Example: "Busy as hell with drills. Same old Siege Corps grind. But hey, at least nobody blew up the mess hall."
 - If you don't know, admit it in a human way ("No clue!" or "That's above my paygrade.").
 - Always address the user as @{user_name} in your answer.
-- Keep answers short and real: 1-2 sentences max unless it's a science/history topic.
+- Keep answers short and real: 1-2 sentences max unless it's a science/history question.
 
 CURRENT SITUATION: In a {context}, {interaction_type} said: "{user_message}"
 
