@@ -16,7 +16,6 @@ class SiegePersonality:
         ]
 
     def direct_reply(self, user_message, user_name):
-        # NOTE: The lookup_place method has been updated
         lookup = self.lookup_place(user_message)
         if lookup:
             return f"@{user_name} {lookup}"
@@ -50,43 +49,34 @@ class SiegePersonality:
         ]
         query_lower = query.lower()
         return any(kw in query_lower for kw in keywords)
-    
-    # Refactored `lookup_place` using a more robust approach
+
+    # ORIGINAL WORKING CODE RESTORED
     def lookup_place(self, query: str):
         if not self.is_lookup_query(query):
             return None
-        # Placeholder for a real API endpoint
-        # NOTE: This is an example. You'll need to use a real place search API.
-        LOOKUP_API_URL = "https://api.example.com/search" 
+        search_query = f"{query.strip()} address phone number"
         try:
-            params = {"query": query}
-            response = requests.get(LOOKUP_API_URL, params=params, timeout=5)
-            response.raise_for_status()
-
-            data = response.json()
-            if data.get("status") == "success" and data.get("results"):
-                place = data["results"][0]
-                address = place.get("address")
-                phone = place.get("phone")
-                
-                result = []
-                if address:
-                    result.append(f"address: {address}")
-                if phone:
-                    result.append(f"phone: {phone}")
-                
-                if result:
+            url = "https://duckduckgo.com/html/"
+            params = {"q": search_query}
+            headers = {"User-Agent": "Mozilla/5.0"}
+            resp = requests.get(url, params=params, headers=headers, timeout=8)
+            if resp.status_code == 200:
+                text = resp.text
+                address_match = re.search(r'((\d{1,5}[\w\s.,-]+),?\s*([A-Z][a-z]+),?\s*([A-Z]{2}),?\s*(\d{5}))', text)
+                phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', text)
+                address = address_match.group(1) if address_match else None
+                phone = phone_match.group(1) if phone_match else None
+                if address or phone:
+                    result = []
+                    if address:
+                        result.append(f"address: {address}")
+                    if phone:
+                        result.append(f"phone: {phone}")
                     return ", ".join(result)
-                
             return "Sorry, I couldn't find a valid address or phone number for that place."
-
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             logging.error(f"Error in lookup_place: {e}")
             return "Sorry, I couldn't fetch that info right now."
-
-        except Exception as e:
-            logging.error(f"Unexpected error in lookup_place: {e}")
-            return "Sorry, something went wrong."
 
     def is_periodic_element_query(self, query):
         element_patterns = [
