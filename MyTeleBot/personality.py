@@ -101,19 +101,31 @@ class SiegePersonality:
             headers = {"User-Agent": "Mozilla/5.0"}
             resp = requests.get(url, params=params, headers=headers, timeout=8)
             if resp.status_code == 200:
-                text = resp.text
+                soup = BeautifulSoup(resp.text, 'html.parser')
                 
-                # First, try the specific address regex
-                address_match = re.search(r'((\d{1,5}[\w\s.,-]+),?\s*([A-Z][a-z]+),?\s*([A-Z]{2}),?\s*(\d{5}))', text)
+                # Use a much more reliable search with BeautifulSoup
+                # Find the div that contains the address and phone number information
+                # We can't know the exact div name, but we can search for one that contains a lot of address-like text
+                info_divs = soup.find_all('div', {'class': 'result--map__detail'})
                 
-                # If that fails, try a more general regex
-                if not address_match:
-                    address_match = re.search(r'(\d+[\s\w,.-]+,?\s*[\s\w.-]+,?\s*\w{2}\s*\d{5})', text, re.IGNORECASE)
+                address = None
+                phone = None
                 
-                phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', text)
-                
-                address = address_match.group(1) if address_match else None
-                phone = phone_match.group(1) if phone_match else None
+                for div in info_divs:
+                    div_text = div.get_text()
+                    
+                    # Regex to find a standard US address
+                    address_match = re.search(r'(\d+[\s\w,.-]+\s*\w{2}\s*\d{5})', div_text, re.IGNORECASE)
+                    if address_match:
+                        address = address_match.group(1).strip()
+                        
+                    # Regex to find a phone number
+                    phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', div_text, re.IGNORECASE)
+                    if phone_match:
+                        phone = phone_match.group(1).strip()
+                        
+                    if address and phone:
+                        break # Found both, exit the loop
                 
                 if address or phone:
                     result = []
