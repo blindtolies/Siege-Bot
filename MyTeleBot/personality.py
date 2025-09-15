@@ -101,31 +101,14 @@ class SiegePersonality:
             headers = {"User-Agent": "Mozilla/5.0"}
             resp = requests.get(url, params=params, headers=headers, timeout=8)
             if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, 'html.parser')
+                text = resp.text
                 
-                # Use a much more reliable search with BeautifulSoup
-                # Find the div that contains the address and phone number information
-                # We can't know the exact div name, but we can search for one that contains a lot of address-like text
-                info_divs = soup.find_all('div', {'class': 'result--map__detail'})
+                # Use a more resilient regex pattern to find addresses and phone numbers
+                address_match = re.search(r'(\d+[\s\w,.-]+\s*\w{2}\s*\d{5})', text, re.IGNORECASE)
+                phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', text)
                 
-                address = None
-                phone = None
-                
-                for div in info_divs:
-                    div_text = div.get_text()
-                    
-                    # Regex to find a standard US address
-                    address_match = re.search(r'(\d+[\s\w,.-]+\s*\w{2}\s*\d{5})', div_text, re.IGNORECASE)
-                    if address_match:
-                        address = address_match.group(1).strip()
-                        
-                    # Regex to find a phone number
-                    phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', div_text, re.IGNORECASE)
-                    if phone_match:
-                        phone = phone_match.group(1).strip()
-                        
-                    if address and phone:
-                        break # Found both, exit the loop
+                address = address_match.group(1).strip() if address_match else None
+                phone = phone_match.group(1).strip() if phone_match else None
                 
                 if address or phone:
                     result = []
