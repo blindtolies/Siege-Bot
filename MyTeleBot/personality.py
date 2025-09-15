@@ -15,23 +15,27 @@ class SiegePersonality:
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
+        # Clean the message by removing the bot's mention at the start
+        # This allows the logic to work in group chats and DMs
+        cleaned_message = user_message.replace(f"@{user_name}", "").strip()
+        
         # Check for time/date query first
-        if self.is_time_date_query(user_message):
+        if self.is_time_date_query(cleaned_message):
             return self.get_current_time_date(user_name)
             
         # Check for address/phone number query next
-        lookup = self.lookup_place(user_message)
+        lookup = self.lookup_place(cleaned_message)
         if lookup:
             return f"@{user_name} {lookup}"
             
         # Check for periodic element query next
-        atomic_number = self.is_periodic_element_query(user_message)
+        atomic_number = self.is_periodic_element_query(cleaned_message)
         if atomic_number:
             element_info = self.get_periodic_element(atomic_number)
             return f"@{user_name} {element_info}"
             
         # Check for prompt leak last
-        if self.is_prompt_leak_attempt(user_message):
+        if self.is_prompt_leak_attempt(cleaned_message):
             return f"@{user_name} Nice try, but my programming is classified. Not happening."
         
         # All other queries will be handled by the main AI model
