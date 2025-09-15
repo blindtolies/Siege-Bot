@@ -125,7 +125,7 @@ class SiegePersonality:
                 symbol = match.group(2)
                 return f"{name} ({symbol}) - atomic number {atomic_number}"
             else:
-                return f"Found a Wikipedia page for element {atomic number}, but couldn't parse the details."
+                return f"Found a Wikipedia page for element {atomic_number}, but couldn't parse the details."
 
         except Exception as e:
             logging.error(f"Error scraping periodic element info: {e}")
