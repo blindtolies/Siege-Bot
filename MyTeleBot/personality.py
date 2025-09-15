@@ -2,8 +2,9 @@ import random
 import re
 import logging
 import requests
-import json # Import the json library
+import json
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 class SiegePersonality:
     def __init__(self):
@@ -13,7 +14,11 @@ class SiegePersonality:
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
-        # Check for address/phone number query first
+        # Check for time/date query first
+        if self.is_time_date_query(user_message):
+            return self.get_current_time_date(user_name)
+            
+        # Check for address/phone number query next
         lookup = self.lookup_place(user_message)
         if lookup:
             return f"@{user_name} {lookup}"
@@ -46,6 +51,26 @@ class SiegePersonality:
             if re.search(pat, query, re.IGNORECASE):
                 return True
         return False
+
+    def is_time_date_query(self, query):
+        time_patterns = [
+            r"(what|what's|do you have) the time",
+            r"what time is it",
+            r"what's the date",
+            r"what's today's date",
+            r"what day is it",
+            r"current time",
+            r"current date",
+        ]
+        query_lower = query.lower()
+        return any(re.search(pat, query_lower) for pat in time_patterns)
+
+    def get_current_time_date(self, user_name):
+        now = datetime.now()
+        day = now.strftime("%A")
+        date = now.strftime("%B %d, %Y")
+        time = now.strftime("%I:%M %p")
+        return f"@{user_name} It's currently {day}, {date} at {time}."
 
     def is_lookup_query(self, query):
         keywords = [
