@@ -15,9 +15,9 @@ class SiegePersonality:
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
-        # Clean the message by removing the bot's mention at the start
-        # This allows the logic to work in group chats and DMs
-        cleaned_message = user_message.replace(f"@{user_name}", "").strip()
+        # Use a robust regular expression to remove any mention ID
+        # This will work for both @name and <@ID> formats in a group chat
+        cleaned_message = re.sub(r'<@!?\d+>', '', user_message).strip()
         
         # Check for time/date query first
         if self.is_time_date_query(cleaned_message):
