@@ -9,16 +9,18 @@ class SiegePersonality:
         self.mood_indicators = [
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
-        # The 'gobble gobble' code has been removed
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
+        # Only check for specific, non-LLM functions here
         lookup = self.lookup_place(user_message)
         if lookup:
             return f"@{user_name} {lookup}"
             
         if self.is_prompt_leak_attempt(user_message):
             return f"@{user_name} Nice try, but my programming is classified. Not happening."
+        
+        # All other queries will be handled by the main AI model
         return None
 
     def is_prompt_leak_attempt(self, query):
