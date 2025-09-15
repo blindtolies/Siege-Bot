@@ -15,9 +15,9 @@ class SiegePersonality:
         self.banned_phrases = [] 
             
     def direct_reply(self, user_message, user_name):
-        # Use a robust regular expression to remove any mention ID
-        # This will work for both @name and <@ID> formats in a group chat
-        cleaned_message = re.sub(r'<@!?\d+>', '', user_message).strip()
+        # Clean the message by removing the bot's mention at the start
+        # This allows the logic to work in group chats and DMs
+        cleaned_message = user_message.replace(f"@{user_name}", "").strip()
         
         # Check for time/date query first
         if self.is_time_date_query(cleaned_message):
@@ -93,7 +93,7 @@ class SiegePersonality:
     def lookup_place(self, query: str):
         if not self.is_lookup_query(query):
             return None
-        
+        # The query already contains the search terms, no need to add more
         search_query = query.strip()
         try:
             url = "https://duckduckgo.com/html/"
@@ -102,14 +102,10 @@ class SiegePersonality:
             resp = requests.get(url, params=params, headers=headers, timeout=8)
             if resp.status_code == 200:
                 text = resp.text
-                
-                # Use a more resilient regex pattern to find addresses and phone numbers
-                address_match = re.search(r'(\d+[\s\w,.-]+\s*\w{2}\s*\d{5})', text, re.IGNORECASE)
+                address_match = re.search(r'((\d{1,5}[\w\s.,-]+),?\s*([A-Z][a-z]+),?\s*([A-Z]{2}),?\s*(\d{5}))', text)
                 phone_match = re.search(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})', text)
-                
-                address = address_match.group(1).strip() if address_match else None
-                phone = phone_match.group(1).strip() if phone_match else None
-                
+                address = address_match.group(1) if address_match else None
+                phone = phone_match.group(1) if phone_match else None
                 if address or phone:
                     result = []
                     if address:
@@ -117,9 +113,7 @@ class SiegePersonality:
                     if phone:
                         result.append(f"phone: {phone}")
                     return ", ".join(result)
-                    
             return "Sorry, I couldn't find a valid address or phone number for that place."
-            
         except Exception as e:
             logging.error(f"Error in lookup_place: {e}")
             return "Sorry, I couldn't fetch that info right now."
