@@ -93,7 +93,8 @@ class SiegePersonality:
     def lookup_place(self, query: str):
         if not self.is_lookup_query(query):
             return None
-        search_query = f"{query.strip()} address phone number"
+        # The query already contains the search terms, no need to add more
+        search_query = query.strip()
         try:
             url = "https://duckduckgo.com/html/"
             params = {"q": search_query}
