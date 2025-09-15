@@ -2,6 +2,7 @@ import random
 import re
 import logging
 import requests
+import json # Import the json library
 from bs4 import BeautifulSoup
 
 class SiegePersonality:
@@ -100,32 +101,29 @@ class SiegePersonality:
 
     def get_periodic_element(self, atomic_number):
         try:
-            # Step 1: Search DuckDuckGo for the element
-            search_query = f"element with atomic number {atomic_number}"
-            headers = {'User-Agent': 'Mozilla/5.0'}
-            response = requests.get(f"https://duckduckgo.com/html/?q={search_query}", headers=headers, timeout=8)
-            soup = BeautifulSoup(response.text, 'html.parser')
-
-            # Step 2: Target the DuckDuckGo "instant answer" box, which is more reliable
-            instant_answer_div = soup.find('div', class_=re.compile(r'zci__body'))
+            # Use a stable, public JSON data source instead of scraping
+            url = "https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/PeriodicTableJSON.json"
+            response = requests.get(url, timeout=10)
+            data = response.json()
             
-            if not instant_answer_div:
-                return f"I couldn't find an instant answer for element {atomic_number}."
+            elements = data.get("elements", [])
+            for element in elements:
+                if element.get("number") == atomic_number:
+                    name = element.get("name")
+                    symbol = element.get("symbol")
+                    return f"{name} ({symbol}) - atomic number {atomic_number}"
+            
+            return f"Couldn't find an element with atomic number {atomic_number}."
 
-            # Step 3: Extract the title and symbol from the instant answer
-            title_tag = instant_answer_div.find('h2', class_=re.compile(r'zci__heading'))
-            symbol_tag = instant_answer_div.find('span', class_=re.compile(r'zci__subheading'))
-
-            if title_tag and symbol_tag:
-                name = title_tag.get_text().strip()
-                symbol = symbol_tag.get_text().strip()
-                return f"{name} ({symbol}) - atomic number {atomic_number}"
-            else:
-                return f"Found a DuckDuckGo instant answer, but couldn't parse the details for element {atomic_number}."
-
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Network error while fetching periodic table data: {e}")
+            return "Sorry, I couldn't connect to my data source right now."
+        except json.JSONDecodeError as e:
+            logging.error(f"JSON parsing error: {e}")
+            return "Sorry, I had a problem reading my data source."
         except Exception as e:
-            logging.error(f"Error scraping periodic element info: {e}")
-            return "Sorry, I couldn't fetch that info right now."
+            logging.error(f"An unexpected error occurred: {e}")
+            return "An unexpected error occurred while looking that up."
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
         if self.is_prompt_leak_attempt(user_message):
