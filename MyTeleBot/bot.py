@@ -229,7 +229,6 @@ Respond as Siege the mean, rude, sarcastic military android who is scientificall
 
     def post_process_response(self, generated_text: str) -> str:
         """Post-process the AI response to ensure personality consistency"""
-        
         # Remove any AI references and replace with android
         generated_text = re.sub(r'(As an AI|I am an AI|I\'m an AI)', 'As an android', generated_text, flags=re.IGNORECASE)
         
