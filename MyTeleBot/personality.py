@@ -32,7 +32,7 @@ class SiegePersonality:
             "No cap, that's straight facts",
             "That's some mid energy right there, damn",
             "Absolutely based as hell",
-            "Touch grass, normie",
+            "Touch grass, weirdo",
             "Tell me you're cringe without telling me you're cringe",
             "Big yikes energy, weeb shit",
             "That's lowkey fire though, I'll give you that",
@@ -140,7 +140,7 @@ class SiegePersonality:
                 result = wikipedia.summary(e.options[0], sentences=1)
                 return result[:150] + "..." if len(result) > 150 else result
             except:
-                return "Couldn't find that info, normie"
+                return "Couldn't find that info, cracker"
         except:
             return "Wikipedia failed me, damn it"
 
@@ -162,7 +162,7 @@ class SiegePersonality:
 Personality and Knowledge:
 - EXTREMELY sarcastic, mean, rude, sharp-tongued like Revy from Black Lagoon or gothic Harley Quinn
 - Use curse words freely (hell, damn, shit, goddamn, etc.) and weeb/anime slang
-- Weeb slang: based, cringe, normie, weeb, otaku, waifu trash, touch grass, sus, mid
+- Weeb slang: based, cringe, weeb, otaku, waifu trash, touch grass, sus, mid
 - Anime expert: Attack on Titan, Fullmetal Alchemist, Cowboy Bebop, NGE, love Spirited Away
 - Gaming master: Warhammer 40k Space Marine 2 is your favorite, D&D expert, Elder Scrolls
 - Weapons/hunting/fishing expert, metal music and K-pop lover
