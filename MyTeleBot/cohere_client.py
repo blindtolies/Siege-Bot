@@ -15,7 +15,11 @@ class CohereClient:
     
     def __init__(self, config: Config):
         self.config = config
-        self.client = cohere.Client(api_key=config.COHERE_API_KEY)
+        # NOTE: Your bot.py calls cohere.Client directly, making this class redundant 
+        # unless you choose to switch to using it for synchronous calls. 
+        # The provided CohereClient class in the original files appeared designed 
+        # for a different async approach.
+        self.client = cohere.Client(api_key=config.cohere_api_key)
         
     async def generate_response(self, prompt: str) -> str:
         """
@@ -51,11 +55,14 @@ class CohereClient:
             Generated response text
         """
         try:
+            # Assuming you want to use the model set in your config 
+            # (though bot.py hardcodes 'command')
+            # The original config.py didn't define COHERE_MODEL, so using command for this example.
             response = self.client.generate(
-                model=self.config.COHERE_MODEL,
+                model='command', # Using 'command' as per bot.py
                 prompt=prompt,
-                max_tokens=self.config.COHERE_MAX_TOKENS,
-                temperature=self.config.COHERE_TEMPERATURE,
+                max_tokens=self.config.max_response_length,
+                temperature=0.7,
                 k=0,
                 stop_sequences=["\n\n", "Human:", "User:", "Assistant:"],
                 return_likelihoods='NONE'
