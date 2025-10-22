@@ -12,7 +12,7 @@ class SiegeBot:
     def __init__(self):
         self.config = Config()
         self.personality = SiegePersonality()
-        self.cohere_client = cohere.ClientV2(self.config.cohere_api_key)  # Changed to ClientV2
+        self.cohere_client = cohere.ClientV2(self.config.cohere_api_key)
         self.application = None
         self.bot_username = "@Siege_Chat_Bot"
         
@@ -165,7 +165,7 @@ class SiegeBot:
             
             # Generate response with Cohere Chat API
             response = self.cohere_client.chat(
-                model='command-r',
+                model='command-r-08-2024',
                 messages=[
                     {
                         "role": "system",
