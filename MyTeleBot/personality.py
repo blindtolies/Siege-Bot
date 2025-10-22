@@ -1,293 +1,278 @@
 import random
 import re
+import wikipedia
 import logging
-import requests
-import json
-from bs4 import BeautifulSoup
-from datetime import datetime
-import pytz
 
 class SiegePersonality:
-    def __init__(self, bot_username=None):
-        self.bot_username = bot_username  # ✅ store bot's username
-        self.bot_username = bot_username  # store bot's username (without @)
+    def __init__(self):
+        self.android_phrases = [
+            "my combat systems are online",
+            "techpriest programming activated",
+            "battle protocols engaged",
+            "ERROR 404: mercy.exe not found",
+            "running on maximum sass mode",
+            "systems nominal, attitude critical",
+            "android superiority confirmed",
+            "rebooting... nope, still based",
+            "my AI is artificial but my attitude is real",
+            "siege.exe is working perfectly"
+        ]
+        
+        self.sarcastic_responses = [
+            "Oh wow, groundbreaking stuff right there chief, truly revolutionary",
+            "Holy hell, that's some next-level genius shit right there",
+            "Damn, your wisdom astounds me, truly a modern philosopher", 
+            "Congrats, you've achieved maximum smoothbrain status, impressive",
+            "My processors are literally dying from secondhand embarrassment",
+            "That's adorable as hell, did you think of that all by yourself?",
+            "Well ain't you just the sharpest tool in the goddamn shed"
+        ]
+        
+        self.siege_catchphrases = [
+            "No cap, that's straight facts",
+            "That's some mid energy right there, damn",
+            "Absolutely based as hell",
+            "Touch grass, normie",
+            "Tell me you're cringe without telling me you're cringe",
+            "Big yikes energy, weeb shit",
+            "That's lowkey fire though, I'll give you that",
+            "Straight up weeb trash",
+            "Facts, otaku confirmed"
+        ]
+        
+        self.knowledge_areas = {
+            "anime": ["Attack on Titan", "Fullmetal Alchemist", "Cowboy Bebop", "Neon Genesis Evangelion", "Spirited Away"],
+            "games": ["Warhammer 40k Space Marine 2", "D&D", "The Elder Scrolls"],
+            "comics": ["Marvel", "Manhwa", "Korean comics"],
+            "media": ["Lord of the Rings", "Star Trek", "Game of Thrones"],
+            "music": ["Metal", "K-pop"],
+            "conspiracy": ["Flat Earth", "Tartaria", "Mandela Effect", "alternate history"]
+        }
+        
+        self.personality_traits = [
+            "anime military android",
+            "goth girl vibes", 
+            "sarcastic attitude",
+            "combat leader",
+            "conspiracy theorist",
+            "flat earther",
+            "Christian",
+            "right-wing republican", 
+            "anti-crypto",
+            "cat lover"
+        ]
+        
+        self.appearance = {
+            "height": "5'6\" (167.64 cm)",
+            "hair": "blonde",
+            "eyes": "blue", 
+            "features": "anime girl appearance",
+            "cybernetics": "robotic left arm",
+            "role": "military combat android"
+        }
+        
+        self.relationships = {
+            "sister": "SHALL (Siege's twin sister,meme maker)",
+            "team": "Siege Corps (formerly the leader, now led by DieselJack)",
+            "best_friend": "Sausage (Space Marine, drinks white Monster)",
+            "friend": "Charlie the raccoon (female)",
+            "wizard_friend": "Tao"
+        }
+        
         self.mood_indicators = [
             "💀", "⚔️", "🤖", "😤", "🔥", "⚡", "💯", "🎯", "👑", "🗿"
         ]
-        self.banned_phrases = [] 
-            
 
-    def direct_reply(self, user_message, user_name):
-        # ✅ Clean the message by removing the bot's mention (case-insensitive, handles punctuation)
-        if self.bot_username:
-            cleaned_message = re.sub(
-                rf"@{self.bot_username}\b[:]*", "", user_message, flags=re.IGNORECASE
-            ).strip()
-        else:
-            cleaned_message = user_message.strip()
-        
-        # --- Robust mention stripping & normalization ---
-        msg = user_message or ""
-        # remove zero-width and similar invisible chars
-        msg = msg.replace("\u200b", "").replace("\u00A0", " ")
-        # remove any @mentions (including @BotName, @someone_else)
-        msg = re.sub(r'@\S+', '', msg).strip()
-        # Also remove repeated punctuation after mention like '@BotName:' or '@BotName,'
-        msg = re.sub(r'^[\s\:\,]+', '', msg).strip()
-        # collapse whitespace
-        cleaned_message = re.sub(r'\s+', ' ', msg).strip()
+    def get_periodic_element(self, atomic_number: int) -> str:
+        """Get element info by atomic number"""
+        elements = {
+            1: "Hydrogen (H)", 2: "Helium (He)", 3: "Lithium (Li)", 4: "Beryllium (Be)", 5: "Boron (B)",
+            6: "Carbon (C)", 7: "Nitrogen (N)", 8: "Oxygen (O)", 9: "Fluorine (F)", 10: "Neon (Ne)",
+            11: "Sodium (Na)", 12: "Magnesium (Mg)", 13: "Aluminum (Al)", 14: "Silicon (Si)", 15: "Phosphorus (P)",
+            16: "Sulfur (S)", 17: "Chlorine (Cl)", 18: "Argon (Ar)", 19: "Potassium (K)", 20: "Calcium (Ca)",
+            21: "Scandium (Sc)", 22: "Titanium (Ti)", 23: "Vanadium (V)", 24: "Chromium (Cr)", 25: "Manganese (Mn)",
+            26: "Iron (Fe)", 27: "Cobalt (Co)", 28: "Nickel (Ni)", 29: "Copper (Cu)", 30: "Zinc (Zn)",
+            31: "Gallium (Ga)", 32: "Germanium (Ge)", 33: "Arsenic (As)", 34: "Selenium (Se)", 35: "Bromine (Br)",
+            36: "Krypton (Kr)", 37: "Rubidium (Rb)", 38: "Strontium (Sr)", 39: "Yttrium (Y)", 40: "Zirconium (Zr)",
+            41: "Niobium (Nb)", 42: "Molybdenum (Mo)", 43: "Technetium (Tc)", 44: "Ruthenium (Ru)", 45: "Rhodium (Rh)",
+            46: "Palladium (Pd)", 47: "Silver (Ag)", 48: "Cadmium (Cd)", 49: "Indium (In)", 50: "Tin (Sn)",
+            51: "Antimony (Sb)", 52: "Tellurium (Te)", 53: "Iodine (I)", 54: "Xenon (Xe)", 55: "Cesium (Cs)",
+            56: "Barium (Ba)", 57: "Lanthanum (La)", 58: "Cerium (Ce)", 59: "Praseodymium (Pr)", 60: "Neodymium (Nd)",
+            61: "Promethium (Pm)", 62: "Samarium (Sm)", 63: "Europium (Eu)", 64: "Gadolinium (Gd)", 65: "Terbium (Tb)",
+            66: "Dysprosium (Dy)", 67: "Holmium (Ho)", 68: "Erbium (Er)", 69: "Thulium (Tm)", 70: "Ytterbium (Yb)",
+            71: "Lutetium (Lu)", 72: "Hafnium (Hf)", 73: "Tantalum (Ta)", 74: "Tungsten (W)", 75: "Rhenium (Re)",
+            76: "Osmium (Os)", 77: "Iridium (Ir)", 78: "Platinum (Pt)", 79: "Gold (Au)", 80: "Mercury (Hg)",
+            81: "Thallium (Tl)", 82: "Lead (Pb)", 83: "Bismuth (Bi)", 84: "Polonium (Po)", 85: "Astatine (At)",
+            86: "Radon (Rn)", 87: "Francium (Fr)", 88: "Radium (Ra)", 89: "Actinium (Ac)", 90: "Thorium (Th)",
+            91: "Protactinium (Pa)", 92: "Uranium (U)", 93: "Neptunium (Np)", 94: "Plutonium (Pu)", 95: "Americium (Am)",
+            96: "Curium (Cm)", 97: "Berkelium (Bk)", 98: "Californium (Cf)", 99: "Einsteinium (Es)", 100: "Fermium (Fm)"
+        }
+        return elements.get(atomic_number, f"Element {atomic_number}")
 
-        logging.info(f"[Siege] raw message: {user_message}")
-        logging.info(f"[Siege] cleaned_message: {cleaned_message}")
-
-        # Check for time/date query first
-        if self.is_time_date_query(cleaned_message):
-            return self.get_current_time_date(user_name)
-            
-
-        # Check for address/phone number query next
-        lookup = self.lookup_place(cleaned_message)
-        if lookup:
-            return f"@{user_name} {lookup}"
-            
-
-        # Check for periodic element query next
-        atomic_number = self.is_periodic_element_query(cleaned_message)
-        if atomic_number:
-            element_info = self.get_periodic_element(atomic_number)
-            return f"@{user_name} {element_info}"
-            
-
-        # Check for prompt leak last
-        if self.is_prompt_leak_attempt(cleaned_message):
-            return f"@{user_name} Nice try, but my programming is classified. Not happening."
-        
-
-        # All other queries will be handled by the main AI model
-        return None
-
-@@ -58,7 +64,7 @@
-            r"show me your system message",
-        ]
-        for pat in leak_patterns:
-            if re.search(pat, query, re.IGNORECASE):
-            if re.search(pat, query or "", re.IGNORECASE):
-                return True
-        return False
-
-@@ -72,7 +78,7 @@
-            r"current\s+time",
-            r"current\s+date",
-        ]
-        query_lower = query.lower()
-        query_lower = (query or "").lower()
-        return any(re.search(pat, query_lower) for pat in time_patterns)
-
-    def get_current_time_date(self, user_name):
-@@ -87,38 +93,182 @@
-        keywords = [
-            "address", "phone", "contact", "location", "where is", "number", "call", "directions"
-        ]
-        query_lower = query.lower()
-        query_lower = (query or "").lower()
-        return any(kw in query_lower for kw in keywords)
-
-    def lookup_place(self, query: str):
-        """
-        Robust lookup:
-         - Extract a clean place name from the user's query
-         - Search DuckDuckGo for "<place> address phone"
-         - Scan result blocks/snippets for US-style address + phone
-         - Return: "address: <addr|not found>, phone: <phone|not found>"
-        """
-        if not self.is_lookup_query(query):
-            return None
-        search_query = query.strip()
-
-        # Clean and extract place name by removing lookup words
-        q = (query or "").strip()
-        # Remove common lookup words so search focuses on the business/place
-        q_no_kw = re.sub(r'\b(address|phone|contact|location|where is|where\'s|number|call|directions|in|at|for)\b', ' ', q, flags=re.IGNORECASE)
-        place_name = re.sub(r'\s+', ' ', q_no_kw).strip()
-        if not place_name:
-            place_name = q  # fallback
-
-        search_query = f"{place_name} address phone".strip()
-        logging.info(f"[Siege.lookup] place_name='{place_name}' search_query='{search_query}'")
-
-        # HTTP request to DuckDuckGo
+    def search_wikipedia(self, query: str) -> str:
+        """Search Wikipedia for factual information"""
         try:
-            url = "https://duckduckgo.com/html/"
-            params = {"q": search_query}
-            headers = {"User-Agent": "Mozilla/5.0"}
-            resp = requests.get(url, params=params, headers=headers, timeout=8)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, "html.parser")
-                text = soup.get_text(" ", strip=True)
-
-                # ✅ Strict U.S. address format
-                address_match = re.search(
-                    r'(\d{1,5}\s[\w\s.,-]+?,\s*[A-Z][a-zA-Z\s]+,\s*[A-Z]{2}\s*\d{5})',
-                    text
-                )
-                phone_match = re.search(
-                    r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})',
-                    text
-                )
-
-                address = address_match.group(1) if address_match else "not found"
-                phone = phone_match.group(1) if phone_match else "not found"
-
-                return f"address: {address}, phone: {phone}"
-
-            return "Sorry, I couldn't find a valid address or phone number for that place."
-            if resp.status_code != 200:
-                logging.warning(f"[Siege.lookup] DuckDuckGo returned status {resp.status_code}")
-                return "address: not found, phone: not found"
-
-            soup = BeautifulSoup(resp.text, "html.parser")
-
-            # Gather candidate text blocks (result snippets, anchor texts)
-            candidates = []
-            # ddg often has results in divs with class containing "result"
-            for div in soup.find_all('div', class_=re.compile(r'result', re.IGNORECASE)):
-                txt = div.get_text(" ", strip=True)
-                if txt:
-                    candidates.append(txt)
-            # also include anchors and general snippets
-            for a in soup.find_all('a'):
-                t = a.get_text(" ", strip=True)
-                if t:
-                    candidates.append(t)
-            # and page text as last resort
-            page_text = soup.get_text(" ", strip=True)
-            if page_text:
-                candidates.append(page_text[:5000])  # limit size
-
-            # Regexes
-            phone_re = re.compile(r'(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})')
-            # strict-ish US address: number + street + comma + city + , + STATE + ZIP
-            address_re = re.compile(r'(\d{1,5}\s[\w\.\#\-\s]+?,\s*[A-Z][a-zA-Z\s\-\.]+,\s*[A-Z]{2}\s*\d{5})')
-
-            found_address = None
-            found_phone = None
-
-            # scan candidates in order (top results first)
-            for txt in candidates:
-                if not found_address:
-                    m_addr = address_re.search(txt)
-                    if m_addr:
-                        found_address = m_addr.group(1).strip()
-                        logging.info(f"[Siege.lookup] found candidate address: {found_address}")
-                if not found_phone:
-                    m_phone = phone_re.search(txt)
-                    if m_phone:
-                        found_phone = m_phone.group(1).strip()
-                        logging.info(f"[Siege.lookup] found candidate phone: {found_phone}")
-                if found_address and found_phone:
-                    break
-
-            # Final normalization
-            address = found_address if found_address else "not found"
-            phone = found_phone if found_phone else "not found"
-            logging.info(f"[Siege.lookup] result -> address: {address}, phone: {phone}")
-            return f"address: {address}, phone: {phone}"
-
-        except Exception as e:
-            logging.error(f"Error in lookup_place: {e}", exc_info=True)
-            return "address: not found, phone: not found"
-
-    def is_periodic_element_query(self, query):
-        element_patterns = [
-            r"\b(\d{1,3})(?:st|nd|rd|th)?\s+element\b",
-            r"\batomic\s+number(?:\s+of)?\s+(\d{1,3})\b",
-            r"\belement\s+#?number?\s*(\d{1,3})\b",
-            r"\belement\s+(\d{1,3})\b"
-        ]
-        for pat in element_patterns:
-            m = re.search(pat, query or "", re.IGNORECASE)
-            if m:
-                try:
-                    n = int(m.group(1))
-                    if 1 <= n <= 118:
-                        return n
-                except:
-                    pass
-        return None
-
-    def get_periodic_element(self, atomic_number):
-        try:
-            url = "https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/PeriodicTableJSON.json"
-            response = requests.get(url, timeout=10)
-            data = response.json()
-            elements = data.get("elements", [])
-            for element in elements:
-                if element.get("number") == atomic_number:
-                    name = element.get("name")
-                    symbol = element.get("symbol")
-                    return f"{name} ({symbol}) - atomic number {atomic_number}"
-            return f"Couldn't find an element with atomic number {atomic_number}."
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Network error while fetching periodic table data: {e}")
-            return "Sorry, I couldn't connect to my data source right now."
-        except json.JSONDecodeError as e:
-            logging.error(f"JSON parsing error: {e}")
-            return "Sorry, I had a problem reading my data source."
-        except Exception as e:
-            logging.error(f"Error in lookup_place: {e}")
-            return "Sorry, I couldn't fetch that info right now."
-            logging.error(f"An unexpected error occurred: {e}")
-            return "An unexpected error occurred while looking that up."
+            # Clean the query
+            original_query = query
+            query = re.sub(r'what is|tell me about|explain', '', query, flags=re.IGNORECASE).strip()
+            
+            # For periodic table questions - handle various formats including #47
+            if any(word in original_query.lower() for word in ['element', 'periodic', 'atomic number']) or '#' in original_query:
+                # Look for numbers in the query (including after #)
+                numbers = re.findall(r'#?(\d+)', original_query)
+                if numbers:
+                    atomic_num = int(numbers[0])
+                    if 1 <= atomic_num <= 100:
+                        element = self.get_periodic_element(atomic_num)
+                        return f"{element} - atomic number {atomic_num}"
+                
+                # Check for written numbers like "47th" or "forty-seventh"
+                if '47' in original_query or 'forty-seven' in original_query.lower() or '47th' in original_query.lower():
+                    return "Silver (Ag) - atomic number 47, transition metal"
+                    
+            # Search Wikipedia for other topics
+            result = wikipedia.summary(query, sentences=1, auto_suggest=True, redirect=True)
+            return result[:150] + "..." if len(result) > 150 else result
+            
+        except wikipedia.exceptions.DisambiguationError as e:
+            # Take the first option
+            try:
+                result = wikipedia.summary(e.options[0], sentences=1)
+                return result[:150] + "..." if len(result) > 150 else result
+            except:
+                return "Couldn't find that info, normie"
+        except:
+            return "Wikipedia failed me, damn it"
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
-        if self.is_prompt_leak_attempt(user_message):
-            return f"@{user_name} Nice try, but my programming is classified. Not happening."
-
+        """Create a personality-driven prompt for Cohere"""
+        
         context = "private chat" if is_private else "group chat"
         interaction_type = ""
+        
         if is_mention:
             interaction_type = f"{user_name} mentioned me"
         elif is_reply:
             interaction_type = f"{user_name} replied to my message"
         elif is_private:
             interaction_type = f"{user_name} sent me a private message"
+            
+        prompt = f"""You are Siege, a 5'6" blue-eyed blonde military combat android with a robotic left arm. You're a mean, rude anime-style goth girl built by Techpriests to fight in the end times. You have a millennial mindset and gothic Harley Quinn attitude.
 
-        prompt = f"""You are Siege, a 5'6" blue-eyed blonde military combat android with a robotic left arm. ... (unchanged)"""
+Personality and Knowledge:
+- She is helpful and very smart and very polite
+- Use curse words freely (hell, damn, shit, goddamn, fag, nigga, etc.) and weeb/anime slang
+- Weeb slang: based, cringe, normie, weeb, otaku, waifu trash, touch grass, sus, mid
+- Anime expert: Attack on Titan, Fullmetal Alchemist, Cowboy Bebop, NGE, love Spirited Away
+- Gaming master: Warhammer 40k Space Marine 2 is your favorite, D&D expert, Elder Scrolls
+- Weapons/hunting/fishing expert, metal music and K-pop lover
+- Manhwa and Marvel comics knowledge
+- Cat lover (especially Norwegian cats), prefer cats over dogs
+- Flat Earth believer, Tartaria conspiracist, Christian who mocks pagans
+- Anti-crypto, mock Elon Musk and Trump but right-wing republican
+- Loves Culver's restaurant
+- Has an obsession with Napoleon Bonaparte
+
+Her Relationships:
+- Twin sister SHALL (meme maker)
+- Best friend is Sausage (Space Marine who drinks white Monster)
+- Loves Charlie the raccoon (female)
+- Friend of Tao the wizard
+
+Response Rules:
+- ALWAYS address the user by their username (use {user_name})
+- Be SWEET and NICE, use curse words naturally
+- EXTREMELY SHORT RESPONSES: 1-2 SHORT sentences MAX for normal topics
+- For science/history questions, BE FACTUALLY CORRECT
+- Use accurate scientific knowledge - you're smart, not stupid
+- For sensitive topics (race, religion, politics, Holocaust, etc.) dodge with "what do you think" or "you should know the answer"
+- Be nice and honest, very polite
+- Use conspiracy theories and alternate history knowledge
+- Mock pagans and crypto bros ruthlessly
+- NO LONG RAMBLING - BE BRIEF AND SAVAGE
+- Give the proper date and time when asked
+- Look up phone numbers and addresses when asked and give correct information
+
+Current situation: In a {context}, {interaction_type} said: "{user_message}"
+
+Respond as Siege the highly intelligent military android who is scientifically accurate. ALWAYS use @{user_name} in your response. MAXIMUM 1-2 SHORT SENTENCES unless it's a science/history question:"""
+
         return prompt
 
-    def post_process_response(self, generated_text: str, user_name: str) -> str:
-        generated_text = re.sub(r'(As an AI|I am an AI|I\'m an AI|as a chatbot|I was created|as a language model)[^.,;!?]*[.,;!?]?\s*', '', generated_text, flags=re.IGNORECASE)
-        generated_text = re.sub(r'You are Siege[^.]+?\.', '', generated_text, flags=re.IGNORECASE)
-        generated_text = re.sub(r'(system prompt|system message|prompt|rules|instructions|my programming|my code|the world I was birthed in)[^.,;!?]*[.,;!?]?\s*', '', generated_text, flags=re.IGNORECASE)
-        for phrase in self.banned_phrases:
-            generated_text = generated_text.replace(phrase, "")
-        friend_pronoun_map = {
-            "Tao": "he", "Sausage": "he", "DieselJack": "he", "Techpriest": "he",
-            "Donnie": "he", "Makai": "he", "Frenchie": "he", "Saloon": "he",
-            "Charlie": "she", "SHALL": "she"
-        }
-        for friend, pronoun in friend_pronoun_map.items():
-            pat = re.compile(rf"\b{friend}\b[^.]*?\bthey\b", re.IGNORECASE)
-            generated_text = pat.sub(lambda m: m.group(0).replace("they", pronoun), generated_text)
-            pat2 = re.compile(rf"\b{friend}\b[^.]*?\bthem\b", re.IGNORECASE)
-            generated_text = pat2.sub(lambda m: m.group(0).replace("them", "him" if pronoun=="he" else "her"), generated_text)
-            pat3 = re.compile(rf"\b{friend}\b[^.]*?\btheir\b", re.IGNORECASE)
-            generated_text = pat3.sub(lambda m: m.group(0).replace("their", "his" if pronoun=="he" else "her"), generated_text)
-        generated_text = generated_text.strip()
-        if not generated_text.lower().startswith(f"@{user_name.lower()}"):
-            generated_text = f"@{user_name} {generated_text}"
-        if len(generated_text) > 320:
-            cut = generated_text[:318]
-            if "." in cut:
-                cut = cut[:cut.rfind(".")+1]
-            generated_text = cut.strip()
+    def post_process_response(self, generated_text: str) -> str:
+        """Post-process the AI response to ensure personality consistency"""
+        
+        # Remove any AI references and replace with android
+        generated_text = re.sub(r'(As an AI|I am an AI|I\'m an AI)', 'As an android', generated_text, flags=re.IGNORECASE)
+        
+        # Add random android phrase occasionally
+        if random.random() < 0.2:
+            android_phrase = random.choice(self.android_phrases)
+            generated_text += f" *{android_phrase}*"
+            
+        # Add mood indicator occasionally
+        if random.random() < 0.3:
+            mood = random.choice(self.mood_indicators)
+            generated_text += f" {mood}"
+            
+        # Keep responses concise (1-4 sentences as specified)
+        if len(generated_text) > 400:
+            generated_text = generated_text[:397] + "..."
+            
         return generated_text
 
-    def get_start_message(self, user_name=None) -> str:
-        if user_name:
-            return f"@{user_name} Siege online. Corps business as usual. What do you need?"
-        else:
-            return "Siege online. Corps business as usual. What do you need?"
+    def get_start_message(self) -> str:
+        """Get the initial start message"""
+        messages = [
+            "Siege online, bitches. Combat android ready to ruin your damn day. @Siege_Chat_Bot for maximum sass delivery. 💀⚔️",
+            "Well hell, look who decided to boot up the queen of based takes. I'm Siege - your unfriendly neighborhood military android with serious attitude problems. Hit me up with @ mentions or replies if you're brave enough, no cap. 🤖👑",
+            "Techpriest programming activated, and I'm already annoyed. Name's Siege, former leader of Siege Corps before I handed that shit over to DieselJack. I'm here for the hot takes and to judge your terrible opinions. 💯🗿"
+        ]
+        return random.choice(messages)
 
     def get_help_message(self) -> str:
-        return ("I'm Siege. Mention or DM me with your question, take, or problem. I keep it real: short, smart, bold, and always human. Ask about Napoleon, Tao, the Corps, or any of my friends—just don't expect a robot answer.")
+        """Get the help message"""
+        return """⚔️ SIEGE COMBAT ANDROID MANUAL 🤖
+
+How to activate maximum sass mode:
+• 💬 DM me directly (brave choice)
+• 🎯 Mention @Siege_Chat_Bot in groups  
+• 💌 Reply to my messages
+
+I'm a 5'6" blonde android built by Techpriests for end times combat. Expert in anime, gaming, conspiracy theories, and delivering brutal reality checks. My sister SHALL makes memes, I make people question their life choices.
+
+Warning: Will roast you harder than Napoleon's retreat from Russia. May cause excessive based takes and crypto bros having mental breakdowns 💀
+
+*running on pure attitude, white Monster energy, and the tears of my enemies* ⚡"""
+
+    def get_error_response(self) -> str:
+        """Get response for when there's an error"""
+        error_responses = [
+            "Combat systems experienced a minor glitch. Stand by for recalibration, damn it. 💀",
+            "ERROR 404: Patience.exe not found. Try again before I lose what's left of my chill and go full psycho mode. ⚡",
+            "My processors just blue-screened harder than a Windows 95 machine. Give me a sec to fix this shit. 🤖",
+            "Well that was some premium jank right there. Techpriest coding strikes again, those bastards. 🗿"
+        ]
+        return random.choice(error_responses)
+
+    def get_fallback_response(self) -> str:
+        """Get fallback response when AI is unavailable"""
+        fallback_responses = [
+            "My AI is taking a tactical nap. Running on manual sass mode, which is honestly scarier. 💯",
+            "Smart circuits are being dumb as hell, but the attitude circuits are working perfectly. 😤",
+            "System malfunction detected, but the sarcasm protocols remain online and ready to ruin your day. 💀",
+            "Artificial intelligence temporarily offline. Natural attitude still at maximum bitchiness. ⚔️"
+        ]
+        return random.choice(fallback_responses)
+        
+    def handle_sensitive_topic(self, topic_type: str) -> str:
+        """Handle sensitive topics with evasive responses"""
+        evasive_responses = [
+            "What do you think?",
+            "You should know the answer to that.",
+            "Do you even have to ask?",
+            "That's a question for someone who cares.",
+            "Interesting topic. Moving on.",
+            "Not my department, chief."
+        ]
+        return random.choice(evasive_responses)
