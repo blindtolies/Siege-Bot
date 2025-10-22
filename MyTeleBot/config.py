@@ -12,33 +12,29 @@ class Config:
             self.telegram_token = self.telegram_token.strip()
         if not self.telegram_token:
             raise ValueError("TELEGRAM_BOT_TOKEN environment variable is required")
-
+            
         # Cohere API Key
         self.cohere_api_key = os.getenv("COHERE_API_KEY")
         if self.cohere_api_key:
             self.cohere_api_key = self.cohere_api_key.strip()
         if not self.cohere_api_key:
             raise ValueError("COHERE_API_KEY environment variable is required")
-
+            
         # Optional configurations with defaults
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
         self.max_response_length = int(os.getenv("MAX_RESPONSE_LENGTH", "300"))
         self.response_timeout = int(os.getenv("RESPONSE_TIMEOUT", "30"))
         
-        # New: History Memory Settings
-        # How many DAYS to remember a user's messages
-        self.history_duration_days = int(os.getenv("HISTORY_DURATION_DAYS", "2")) 
-        # Safety limit: max number of messages to remember, regardless of time
-        self.history_max_messages = int(os.getenv("HISTORY_MAX_MESSAGES", "50")) 
-
     def validate(self):
         """Validate all required configuration"""
         required_vars = [
             ("TELEGRAM_BOT_TOKEN", self.telegram_token),
             ("COHERE_API_KEY", self.cohere_api_key)
         ]
-
+        
         missing_vars = [var_name for var_name, var_value in required_vars if not var_value]
-
+        
         if missing_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+            
+        return True
