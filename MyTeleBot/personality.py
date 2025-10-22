@@ -279,7 +279,7 @@ Respond as Siege. Be brief and savage:"""
 
         return prompt
 
-    def post_process_response(self, generated_text: str, user_name: str) -> str:
+    def post_process_response(self, generated_text: str, user_name: str = None) -> str:
         """Post-process the AI response to ensure personality consistency"""
         
         # Remove AI/chatbot references
