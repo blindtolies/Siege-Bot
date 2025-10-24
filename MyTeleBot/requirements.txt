@@ -61,3 +61,4 @@ textblob>=0.18.0
 rapidfuzz>=3.9.6
 tinydb>=4.8.2
 schedule>=1.2.2
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
