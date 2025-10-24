@@ -56,9 +56,9 @@ wikipedia==1.4.0
 youtube-search-python==1.6.6
 duckduckgo-search>=6.2.5
 vaderSentiment>=3.3.2
-spacy>=3.7.5
 textblob>=0.18.0
 rapidfuzz>=3.9.6
 tinydb>=4.8.2
 schedule>=1.2.2
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
+
+
