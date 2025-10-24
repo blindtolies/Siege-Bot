@@ -153,16 +153,16 @@ class SiegeBot:
         # Define trigger keywords based on Siege's interests
         trigger_keywords = [
             # Topics she knows/loves
-            'anime', 'warhammer', 'cat',
-            'marvel', 'manhwa', 'comic',
+            'anime', 'warhammer', 'cat', 'Skyrim',
+            'marvel', 'manhwa', 'comic', 'kpop',
             # Things she mocks
-            'crypto', 'trump', 'elon', 
+            'crypto', 'trump', 'elon', 'liberal',
             # Conspiracy theories
-            'tartaria', 'conspiracy', 'mandela effect',
+            'tartaria', 'conspiracy', 'mandela effect', 'aliens',
             # Her relationships
-            'charlie', 'dieseljack', 'tao',
+            'charlie', 'dieseljack', 'tao', 'deonnie',
             # Other personality traits
-            'based', 'red pilled', 'android',
+            'based', 'red pilled', 'android', 'kino',
         ]
         
         # Check if any trigger keyword is in the message
