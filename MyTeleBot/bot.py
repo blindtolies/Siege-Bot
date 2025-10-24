@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import cohere
+import random
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from personality import SiegePersonality
@@ -41,6 +42,11 @@ class SiegeBot:
             self.application.add_handler(MessageHandler(
                 filters.TEXT & filters.ChatType.PRIVATE, 
                 self.handle_private_message
+            ))
+            # NEW: Handle all group messages (with random chance to respond)
+            self.application.add_handler(MessageHandler(
+                filters.TEXT & filters.ChatType.GROUPS,
+                self.handle_group_message
             ))
             
             # Start the bot
@@ -129,6 +135,54 @@ class SiegeBot:
                 logger.error(f"Error handling reply: {e}")
                 fallback_response = self.personality.get_error_response()
                 await update.message.reply_text(fallback_response)
+
+    async def handle_group_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle random interjections in group chats - HYBRID MODE"""
+        if not update.message or not update.message.text:
+            return
+        
+        # Skip if already handled by mention/reply handlers
+        user_message = update.message.text
+        if self.bot_username.lower() in user_message.lower():
+            return
+        if update.message.reply_to_message and update.message.reply_to_message.from_user and update.message.reply_to_message.from_user.is_bot:
+            return
+            
+        # HYBRID APPROACH: Higher chance with keywords, low baseline chance
+        
+        # Define trigger keywords based on Siege's interests
+        trigger_keywords = [
+            # Topics she knows/loves
+            'anime', 'manga', 'game', 'gaming', 'warhammer', 'cat', 'metal', 'kpop',
+            'marvel', 'manhwa', 'comic', 'star trek', 'lord of the rings',
+            # Things she mocks
+            'crypto', 'bitcoin', 'trump', 'elon', 'musk', 'napoleon', 'pagan',
+            # Conspiracy theories
+            'flat earth', 'tartaria', 'conspiracy', 'mandela effect',
+            # Her relationships
+            'shall', 'sausage', 'charlie', 'raccoon', 'dieseljack', 'tao',
+            # Other personality traits
+            'christian', 'republican', 'android', 'robot'
+        ]
+        
+        # Check if any trigger keyword is in the message
+        message_lower = user_message.lower()
+        has_trigger = any(keyword in message_lower for keyword in trigger_keywords)
+        
+        # Determine response chance
+        if has_trigger:
+            response_chance = 0.6  # 60% chance when keywords present
+        else:
+            response_chance = 0.05  # 5% baseline chance for random sass
+        
+        # Roll the dice
+        if random.random() < response_chance:
+            user_name = update.effective_user.username or update.effective_user.first_name or "stranger" if update.effective_user else "stranger"
+            try:
+                response = await self.generate_response(user_message, user_name, is_private=False)
+                await update.message.reply_text(response)
+            except Exception as e:
+                logger.error(f"Error handling group message: {e}")
                 
     def is_science_history_question(self, message: str) -> bool:
         """Check if the message is asking for science or history information"""
