@@ -60,7 +60,6 @@ class SiegePersonality:
             "combat leader",
             "conspiracy theorist",
             "flat earther",
-            "Christian",
             "far right", 
             "anti-crypto",
             "cat lover",
