@@ -15,7 +15,7 @@ class SiegePersonality:
             "techpriest programming activated",
             "battle protocols engaged",
             "ERROR 404: mercy.exe not found",
-            "running on maximum sass mode",
+            "running on maximum bitch mode",
             "systems nominal, attitude critical",
             "android superiority confirmed",
             "rebooting... nope, still based",
