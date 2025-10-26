@@ -160,7 +160,7 @@ class SiegeBot:
             # Conspiracy theories
             'tartaria', 'conspiracy', 'mandela effect', 'aliens',
             # Her relationships
-            'charlie', 'dieseljack', 'tao', 'deonnie',
+            'charlie', 'dieseljack', 'tao', 'donnie',
             # Other personality traits
             'based', 'red pilled', 'android', 'kino',
         ]
