@@ -171,9 +171,9 @@ class SiegeBot:
         
         # Determine response chance
         if has_trigger:
-            response_chance = 0.09  # 9% chance when keywords present
+            response_chance = 0.05  # 5% chance when keywords present
         else:
-            response_chance = 0.09  # 9% baseline chance for random sass
+            response_chance = 0.05  # 5% baseline chance for random sass
         
         # Roll the dice
         if random.random() < response_chance:
@@ -231,7 +231,7 @@ class SiegeBot:
                     }
                 ],
                 max_tokens=150,
-                temperature=0.9,
+                temperature=0.8,
             )
             
             generated_text = response.message.content[0].text.strip()
