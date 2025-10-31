@@ -9,7 +9,6 @@ from datetime import datetime
 import pytz
 
 class SiegePersonality:
-    def __init__(self):
 
     def create_prompt(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
         """Create a personality-driven prompt for Cohere"""
