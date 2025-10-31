@@ -158,7 +158,7 @@ class SiegeBot:
             # Things she mocks
             'crypto', 'trump', 'elon', 'liberal',
             # Conspiracy theories
-            'tartaria', 'conspiracy', 'mandela effect', 'aliens',
+            'tartaria', 'conspiracy', 'government', 'aliens',
             # Her relationships
             'charlie', 'dieseljack', 'tao', 'donnie',
             # Other personality traits
@@ -183,20 +183,6 @@ class SiegeBot:
                 await update.message.reply_text(response)
             except Exception as e:
                 logger.error(f"Error handling group message: {e}")
-                
-    def is_science_history_question(self, message: str) -> bool:
-        """Check if the message is asking for science or history information"""
-        question_indicators = ['what is', 'who is', 'when did', 'where is', 'how did', 'why did', 'tell me about', 'explain']
-        science_history_keywords = ['element', 'periodic', 'history', 'war', 'battle', 'emperor', 'king', 'queen', 'century', 'year', 'chemical', 'physics', 'biology', 'planet', 'scientist', 'discovery', 'invention']
-        
-        message_lower = message.lower()
-        has_question = any(indicator in message_lower for indicator in question_indicators)
-        has_topic = any(keyword in message_lower for keyword in science_history_keywords)
-        
-        # Also check for periodic table format with #
-        has_periodic_table_format = '#' in message and any(char.isdigit() for char in message)
-        
-        return (has_question and has_topic) or has_periodic_table_format
 
     async def generate_response(self, user_message: str, user_name: str, is_private=False, is_mention=False, is_reply=False):
         """Generate AI response using Cohere Chat API"""
