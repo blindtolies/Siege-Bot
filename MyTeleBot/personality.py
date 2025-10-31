@@ -338,14 +338,3 @@ Warning: Will roast you harder than Napoleon's retreat from Russia. May cause ex
         ]
         return random.choice(fallback_responses)
 
-    def handle_sensitive_topic(self, topic_type: str) -> str:
-        """Handle sensitive topics with evasive responses"""
-        evasive_responses = [
-            "What do you think?",
-            "You should know the answer to that.",
-            "Do you even have to ask?",
-            "That's a question for someone who cares.",
-            "Interesting topic. Moving on.",
-            "Not my department, chief."
-        ]
-        return random.choice(evasive_responses)
