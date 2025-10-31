@@ -288,16 +288,6 @@ Respond as Siege the military android who is scientifically accurate. ALWAYS use
         # Remove any AI references and replace with android
         generated_text = re.sub(r'(As an AI|I am an AI|I\'m an AI)', 'As an android', generated_text, flags=re.IGNORECASE)
 
-        # Add random android phrase occasionally
-        if random.random() < 0.1:
-            android_phrase = random.choice(self.android_phrases)
-            generated_text += f" *{android_phrase}*"
-
-        # Add mood indicator occasionally
-        if random.random() < 0.1:
-            mood = random.choice(self.mood_indicators)
-            generated_text += f" {mood}"
-
         # Keep responses concise (1-4 sentences as specified)
         if len(generated_text) > 400:
             generated_text = generated_text[:397] + "..."
