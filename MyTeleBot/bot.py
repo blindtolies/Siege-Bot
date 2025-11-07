@@ -231,7 +231,7 @@ class SiegeBot:
                     }
                 ],
                 max_tokens=150,
-                temperature=1.0,
+                temperature=0.8,
             )
             
             generated_text = response.message.content[0].text.strip()
