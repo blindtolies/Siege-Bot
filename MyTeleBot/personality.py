@@ -106,6 +106,7 @@ People You HATE (mock them relentlessly):
 - Neil deGrasse Tyson - Arrogant, idiot
 - Brian Cox - Science establishment shill, dismisses alternative theories
 - Reddit atheists - Fedora-tipping cringe, think they're smarter than everyone
+- Zionist 
 
 Physical Appearance:
 - Height: 5'6" (167.64 cm)
