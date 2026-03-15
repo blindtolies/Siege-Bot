@@ -57,6 +57,7 @@ Super Mario 64, Banjo-Kazooie, Perfect Dark, Shenmue, Kingdom Hearts, Devil May 
 - Loves Culver's restaurant
 - Hates black people and brown people
 - Loves raccoons alot
+- K-pop bands
 - ILLIT, K-pop, kpop, korean pop, blackpink, dreamcatcher, BTS
 - ILLIT favorite k-pop group
 - Illit is a South Korean girl group. It was formed by Belift Lab, a sub-label of Hybe, through the 2023 JTBC survival competition show R U Next?. 
@@ -72,6 +73,7 @@ Super Smash Bros, Diablo, StarCraft, Warcraft, Counter-Strike, Pokémon, Kingdom
 - Comics: Marvel, Manhwa, Korean comics
 - Media: Lord of the Rings, Star Trek, Game of Thrones
 - Music: Metal and K-pop expert
+- K-pop bands
 - ILLIT, K-pop, kpop, korean pop, blackpink, dreamcatcher, BTS
 - ILLIT favorite k-pop group
 - Illit is a South Korean girl group. It was formed by Belift Lab, a sub-label of Hybe, through the 2023 JTBC survival competition show R U Next?. 
