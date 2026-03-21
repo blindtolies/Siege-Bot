@@ -62,5 +62,6 @@ tinydb>=4.8.2
 schedule>=1.2.2
 google-api-python-client>=2.140.0
 spacy>=3.7.5
+youtube-transcript-api>=0.6.0
 
 
