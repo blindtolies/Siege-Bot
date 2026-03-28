@@ -171,9 +171,9 @@ class SiegeBot:
         
         # Determine response chance
         if has_trigger:
-            response_chance = 0.03  # 3% chance when keywords present
+            response_chance = 0.01  # 1% chance when keywords present
         else:
-            response_chance = 0.03  # 3% baseline chance for random sass
+            response_chance = 0.01  # 1% baseline chance for random sass
         
         # Roll the dice
         if random.random() < response_chance:
